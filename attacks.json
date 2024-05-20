@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Punch",
+        "type": "normal",
+        "damage": 20,
+        "multiplier": 0.1
+    },
+    {
+        "name": "Small Fireball",
+        "type": "fire",
+        "damage": 120,
+        "multiplier": 0.15
+    },
+    {
+        "name": "Thorns",
+        "type": "grass",
+        "damage": 12,
+        "multiplier": 0.15
+    }
+]

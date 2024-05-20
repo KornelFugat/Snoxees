@@ -1,20 +1,51 @@
+import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import {GestureHandlerRootView} from'react-native-gesture-handler';
+import Battle from './battle/Battle';
+import AfterBattleScreen from './battle/AfterBattleScreen';
+import Screen from './Screen';
+import DraggableMap from './DraggableMap';
 
-export default function App() {
+const App = () => {
+  const [screen, setScreen] = useState('screen'); // 'home', 'battle', or 'afterBattle'
+
+  const startGame = () => {
+    setScreen('battle');
+  };
+
+  const goMainScreen = () => {
+    setScreen('screen');
+  };
+
+  const handleBattleEnd = () => {
+    setScreen('afterBattle');
+  };
+
+  const renderScreen = () => {
+    switch(screen) {
+      case 'battle':
+        return <Battle onGoBack={goMainScreen} onBattleEnd={handleBattleEnd} />;
+      case 'afterBattle':
+        return <AfterBattleScreen onRestartGame={goMainScreen} />;
+      default:
+        return <Screen onStartGame={startGame}/>;
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+    <View style={styles.fullscreen}>
+      {renderScreen()}
     </View>
+    </GestureHandlerRootView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  fullscreen: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
+
+export default App;
