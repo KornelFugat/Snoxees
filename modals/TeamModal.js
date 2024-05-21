@@ -1,11 +1,12 @@
 // TeamModal.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
 import Animated from 'react-native-reanimated';
 import { useMainStore } from '../stores/useMainStore';
 import HealthBar from '../HealthBar';
 import CharacterCard from '../CharacterCard';
+import { Image } from 'expo-image';
 
 const { width, height } = Dimensions.get('window');
 
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
   fullCharacterImage: {
     width: '100%',
     height: '60%',
-    resizeMode: 'contain',
+    contentFit: 'contain',
   },
   emptySlot: {
     width: '100%',
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
   characterImage: {
     width: '100%',
     height: '50%',
-    resizeMode: 'contain',
+    contentFit: 'contain',
   },
   grayTint: {
     tintColor: 'rgba(128, 128, 128, 0.5)',
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
   typeIcon: {
     width: 30,
     height: 30,
-    resizeMode: 'contain',
+    contentFit: 'contain',
   },
 });
 

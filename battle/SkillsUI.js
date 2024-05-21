@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
-import { Text, TouchableOpacity, StyleSheet, ImageBackground, Image, View } from'react-native'
+import { Text, TouchableOpacity, StyleSheet, ImageBackground, View } from'react-native'
 import attacksData from '../attacks.json';
+import { Image } from 'expo-image';
 
 const SkillsUI = ({ onAttackPress, skills, disabled, multiplier }) => {
     const iconMap = {
@@ -60,30 +61,30 @@ const SkillsUI = ({ onAttackPress, skills, disabled, multiplier }) => {
         buttonTextOverlay: {
             position: 'absolute',
             color: '#FFFFFF', // White text for visibility
-            fontSize: 35, // Adjust the font size as needed
+            fontSize: 20, // Adjust the font size as needed
             textAlign: 'center', // Center the text horizontally
             width: '100%', // Cover the full width of the button
             textShadowColor:'#000000',
             textShadowOffset:{width: 2, height: 2},
             textShadowRadius:3,
-            paddingTop: 90,
+            top: '60%',
         },
         buttonimage: {
           flex: 1,
           width: '100%',
           height: '100%',
-          resizeMode: 'contain',
+          contentFit: 'contain',
         },
         paperimage: {
             position: 'absolute',
-            width: 100,
-            height: 100,
+            width: '100%',
+            height: '100%',
         },
         roundskill: {
             position: 'absolute',
-            width: 90,
-            height: 90,
-            resizeMode: 'contain',
+            width: '25%',
+            height: '25%',
+            contentFit: 'contain',
             top:13
         },
         button2: {

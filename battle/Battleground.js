@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming, Easing, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming, Easing, runOnJS, withSpring } from 'react-native-reanimated';
 import { View, Text, StyleSheet, Button, TouchableOpacity, ImageBackground, Image } from 'react-native';
 import SmallFireball from "./Skills/SmallFireball";
 import Punch from "./Skills/Punch";
@@ -11,6 +11,12 @@ import CharacterCard from "../CharacterCard";
 const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, currentPlayerIndex  }) => {
     const enemyOpacity = useSharedValue(0);
     const playerOpacity = useSharedValue(0);
+    const enemyDamageText = useSharedValue('');
+    const playerDamageText = useSharedValue('');
+    const enemyDamageY = useSharedValue(0);
+    const playerDamageY = useSharedValue(0);
+    const enemyTextOpacity = useSharedValue(0);
+    const playerTextOpacity = useSharedValue(0);
     const [turn, setTurn] = useState(currentTurn === 'player');
     const [isPunchActive, setIsPunchActive] = useState(false);
     const [isFireballActive, setIsFireballActive] = useState(false);
@@ -21,39 +27,77 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
 
     //ENEMY GOT HIT
 
-    const triggerEnemyEffect = (repeats = 1) => {
+    const triggerEnemyEffect = (repeats = 1, damage = 0) => {
       const animations = [];
+      const textAnimations = [];
       for (let i = 0; i < repeats; i++) {
         animations.push(
-          withTiming(1, { duration: 300 }),
-          withTiming(0, { duration: 300 })
+          withTiming(1, { duration: 500 }),
+          withTiming(0, { duration: 500 })
+        );
+        textAnimations.push(
+          withSpring(0, { duration: 500 }),
+          withSpring(-40, { duration: 500 }),
         );
       }
-      enemyOpacity.value = withSequence(...animations);
+      enemyOpacity.value = 0;
+      enemyTextOpacity.value = 0;
+      enemyDamageText.value = (damage/repeats).toString();
+      enemyDamageY.value = 0;
+  
+      setTimeout(() => {
+        enemyOpacity.value = withSequence(...animations);
+        enemyTextOpacity.value = withSequence(...animations);
+        enemyDamageY.value = withSequence(...textAnimations);
+      }, 50); // Ensure a small delay to allow the reset to take effect
     };
 
     const enemyDamageTaken = useAnimatedStyle(() => ({
       opacity: enemyOpacity.value,
       tintColor: 'red',
     }));
+
+    const enemyDamageTakenText = useAnimatedStyle(() => ({
+      opacity: enemyTextOpacity.value,
+      transform: [{ translateY: enemyDamageY.value }],
+    }))
       
       //PLAYER GOT HIT
 
-    const triggerPlayerEffect = (repeats = 1) => {
+    const triggerPlayerEffect = (repeats = 1, damage = 0) => {
       const animations = [];
+      const textAnimations = [];
       for (let i = 0; i < repeats; i++) {
         animations.push(
-          withTiming(1, { duration: 300 }),
-          withTiming(0, { duration: 300 })
+          withTiming(1, { duration: 500 }),
+          withTiming(0, { duration: 500 })
+        );
+        textAnimations.push(
+          withSpring(0, { duration: 500 }),
+          withSpring(-40, { duration: 500 }),
         );
       }
-      playerOpacity.value = withSequence(...animations);
+      playerOpacity.value = 0;
+      playerTextOpacity.value = 0;
+      playerDamageText.value = (damage/repeats).toString();
+      playerDamageY.value = 0;
+  
+      setTimeout(() => {
+        playerOpacity.value = withSequence(...animations);
+        playerTextOpacity.value = withSequence(...animations);
+        playerDamageY.value = withSequence(...textAnimations);
+      }, 50); // Ensure a small delay to allow the reset to take effect
     }
 
     const playerDamageTaken = useAnimatedStyle(() => ({
       opacity: playerOpacity.value,
       tintColor: 'red',
     }));
+
+    const playerDamageTakenText = useAnimatedStyle(() => ({
+      opacity: playerTextOpacity.value,
+      transform: [{ translateY: playerDamageY.value }],
+    }))
 
 
     //TURN ANNOUNCEMENT
@@ -104,9 +148,7 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
   };
 
   return (
-    <ImageBackground
-        source={require('../assets/backgroundtoptest.png')}
-        resizeMode="cover"
+    <View
         style={styles.topPart}>
         <View style={styles.playerContainer}>
           <CharacterCard
@@ -133,7 +175,7 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
 
         {/* ATTACKS */}
 
-        <Punch playerTurn={turn} triggerEnemyEffect={triggerEnemyEffect} triggerPlayerEffect={triggerPlayerEffect} isPunchActive={isPunchActive} setIsPunchActive={setIsPunchActive} playerImage={playerImage} enemyImage={enemyImage} />
+        <Punch playerTurn={turn} triggerEnemyEffect={triggerEnemyEffect} triggerPlayerEffect={triggerPlayerEffect} isPunchActive={isPunchActive} setIsPunchActive={setIsPunchActive} playerImage={playerImage} enemyImage={enemyImage} currentPlayerIndex={currentPlayerIndex} />
 
         <SmallFireball playerTurn={turn} triggerEnemyEffect={triggerEnemyEffect} triggerPlayerEffect={triggerPlayerEffect} isFireballActive={isFireballActive} setIsFireballActive={setIsFireballActive} />
 
@@ -158,8 +200,15 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
           source={enemyImage} 
           style={[styles.enemy, enemyDamageTaken]} // Apply the animated style
         />
+
+      <Animated.Text style={[styles.damageEnemyText, enemyDamageTakenText]}>
+        {enemyDamageText.value}
+      </Animated.Text>
+      <Animated.Text style={[styles.damagePlayerText, playerDamageTakenText]}>
+        {playerDamageText.value}
+      </Animated.Text>
         
-      </ImageBackground>
+      </View>
   );
 };
 
@@ -169,6 +218,7 @@ const styles = StyleSheet.create({
       justifyContent: 'top',
       alignItems: 'center',
       width: '100%',
+      backgroundColor: 'transparent'
     },
     playerContainer: {
       flex:1,
@@ -177,6 +227,20 @@ const styles = StyleSheet.create({
       left: '2%',
       width: '40%',
       height:'40%'
+    },
+    damageEnemyText: {
+      position: 'absolute',
+      top: '65%',
+      right: '20%',
+      fontSize: 40,
+      color: 'white',
+    },
+    damagePlayerText: {
+      position: 'absolute',
+      top: '65%',
+      left: '20%',
+      fontSize: 40,
+      color: 'white',
     },
     enemyContainer: {
       position: 'absolute',
@@ -200,7 +264,7 @@ const styles = StyleSheet.create({
       flex: 1,
       width: '100%',
       height: '100%',
-      resizeMode: 'cover',
+      contentFit: 'cover',
     },
     healthBar: {
       width: '100%',

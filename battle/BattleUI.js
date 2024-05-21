@@ -5,7 +5,7 @@ import SkillsUI from './SkillsUI';
 import TeamUI from './TeamUI';
 import ItemsUI from './ItemsUI';
 
-const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacterSwitch, disabled, captureChance, handleCatchEnemy }) => {
+const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacterSwitch, disabled, captureChance, handleCatchEnemy, announcement  }) => {
   const [activeTab, setActiveTab] = useState('skills'); // 'skills', 'items', or 'team'
 
   return (
@@ -29,6 +29,9 @@ const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacter
         >
           <Text style={styles.tabText}>Team</Text>
         </TouchableOpacity>
+        <View style={styles.announcementContainer}>
+          <Text style={styles.announcementText}>{announcement}</Text>
+        </View>
       </View>
       <ImageBackground
         source={require('../assets/light-gradient.png')}
@@ -61,9 +64,10 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'start',
     backgroundColor: 'transparent',
-    paddingVertical: 10,
+    paddingVertical: 0,
+    left: 5,
   },
   tab: {
     padding: 10,
@@ -100,6 +104,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
+  },
+  announcementContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-end', // Align to the right
+    paddingHorizontal: 10, // Add some padding
+  },
+  announcementText: {
+    color: 'white',
+    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    padding: 10,
+    borderRadius: 5,
+    minWidth: '50%',
   },
 });
 

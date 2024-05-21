@@ -1,6 +1,6 @@
 // Battle.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { useBattleLogic } from './BattleLogic';
 import Battleground from './Battleground';
 import BattleUI from './BattleUI';
@@ -13,6 +13,7 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
     skillsDisabled,
     currentPlayerIndex,
     captureChance,
+    announcement,
     handlePlayerAttack,
     handleCatchEnemy,
     handleCharacterSwitch,
@@ -24,7 +25,10 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
   }));
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+        source={require('../assets/backgroundtoptest.png')}
+        resizeMode="contain"
+        style={styles.container}>
       <Battleground 
         currentTurn={currentTurn} 
         triggerAttack={(func) => handleAttackRef.current = func} 
@@ -41,6 +45,7 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
         disabled={skillsDisabled}
         captureChance={captureChance}
         handleCatchEnemy={handleCatchEnemy}
+        announcement={announcement}
       />
       <TouchableOpacity style={styles.catchButton} onPress={handleCatchEnemy}>
         <Text style={styles.text}>Catch Enemy</Text>
@@ -50,7 +55,7 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
       <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
         <Text style={styles.text}>Back to Home</Text>
       </TouchableOpacity>
-    </View>
+    </ImageBackground>
   );
 };
 

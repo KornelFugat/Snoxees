@@ -13,6 +13,9 @@ export const useBattleLogic = (onBattleEnd) => {
   const [captureChance, setCaptureChance] = useState(0);
   const [baseCaptureChance] = useState(0.1);
   const [captureChanceModifier, setCaptureChanceModifier] = useState(1);
+  const [announcementQueue, setAnnouncementQueue] = useState([]);
+  const [currentAnnouncement, setCurrentAnnouncement] = useState('');
+
 
   const { team, enemy, updateEnemyHealth, updateHealth, addExperienceToTeam, addCharacterToOwned } = useMainStore(state => ({
     team: state.team,
@@ -23,10 +26,34 @@ export const useBattleLogic = (onBattleEnd) => {
     addCharacterToOwned: state.addCharacterToOwned
   }));
 
+
+  //ANNOUNCEMENTS
+  const addAnnouncement = (text, displayTime = 3000) => {
+    const timestamp = Date.now();
+    setAnnouncementQueue(prevQueue => [...prevQueue, { text, timestamp, displayTime }]);
+  };
+
+  useEffect(() => {
+    if (announcementQueue.length > 0) {
+      const { text, timestamp, displayTime } = announcementQueue[0];
+      setCurrentAnnouncement(text);
+      const timeElapsed = Date.now() - timestamp;
+
+      const timeout = setTimeout(() => {
+        setAnnouncementQueue(prevQueue => prevQueue.slice(1));
+      }, Math.max(displayTime - timeElapsed, 0));
+
+      return () => clearTimeout(timeout);
+    } else {
+      setCurrentAnnouncement('');
+    }
+  }, [announcementQueue]);
+
   //CHECKING IF THERE IS ANYONE IN THE TEAM
 
   useEffect(() => {
     if (team.length > 0) {
+        addAnnouncement('Get ready!');
       setTimeout(() => {
         setIsInitialized(true);
       }, 3000);
@@ -39,11 +66,13 @@ export const useBattleLogic = (onBattleEnd) => {
 
   useEffect(() => {
     if (isInitialized && enemy.currentHealth <= 0) {
+        addAnnouncement('Victory!');
       setTimeout(() => {
         onBattleEnd();
         addExperienceToTeam(100);
-      }, 2000);
+      }, 3000);
     } else if (isInitialized && team[currentPlayerIndex].currentHealth <= 0) {
+      addAnnouncement(`${team[currentPlayerIndex].name} has been defeated!`, 4000);
       setSkillsDisabled(true);
       switchToNextCharacter();
     }
@@ -53,6 +82,7 @@ export const useBattleLogic = (onBattleEnd) => {
 
   useEffect(() => {
     if (currentTurn === 'player') {
+      addAnnouncement(`${team[currentPlayerIndex].name} turn!`, 5000);
       setSkillsDisabled(false);
     }
   }, [currentTurn]);
@@ -72,12 +102,14 @@ export const useBattleLogic = (onBattleEnd) => {
     const actualDamage = calculateDamage(damage, attackType, player.temporaryStats, multiplier);
 
     handleAttackRef.current && handleAttackRef.current(attackName, actualDamage);
+    addAnnouncement(`${player.name} uses ${attackName}!`);
     setSkillsDisabled(true);
     setTimeout(() => {
       const newEnemyHealth = Math.max(0, enemy.currentHealth - actualDamage);
       updateEnemyHealth(newEnemyHealth);
       setCurrentTurn(newEnemyHealth > 0 ? 'enemy' : 'end');
-    }, 2000);
+      addAnnouncement(`Wild ${enemy.name} turn!`, 2000);
+    }, 3000);
   };
 
   //HANDLING ENEMY'S ATTACK
@@ -88,6 +120,7 @@ export const useBattleLogic = (onBattleEnd) => {
         const randomAttack = enemy.skills[Math.floor(Math.random() * enemy.skills.length)];
         const attackData = attacksData.find(attack => attack.name === randomAttack.name);
         handleAttackRef.current && handleAttackRef.current(attackData.name, attackData.damage);
+        addAnnouncement(`${enemy.name} uses ${randomAttack.name}!`);
         setTimeout(() => {
           updateHealth(team[currentPlayerIndex].id, team[currentPlayerIndex].currentHealth - attackData.damage);
           setCurrentTurn('player');
@@ -164,6 +197,7 @@ export const useBattleLogic = (onBattleEnd) => {
     skillsDisabled,
     currentPlayerIndex,
     captureChance,
+    announcement: currentAnnouncement,
     handlePlayerAttack,
     handleCatchEnemy,
     handleCharacterSwitch,

@@ -1,6 +1,7 @@
 // CharacterCard.js
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import HealthBar from './HealthBar';
 
 const CharacterCard = ({ character, getCharacterTypeIcon }) => {
@@ -31,19 +32,19 @@ const styles = StyleSheet.create({
   },
   healthBar: {
     position: 'absolute',
-    width: '65%',
-    top: '70%',
-    left: '40%', // Center it horizontally
+    width: '100%',
+    top: '90%',
+    left: '10%', // Center it horizontally
   },
   characterImage: {
-    width: 60,
-    height: 60,
+    width: '30%',
+    height: '70%',
     borderRadius: 8,
   },
   level: {
     position: 'absolute',
-    top: 50,
-    left: 60,
+    top: '50%',
+    left: '10%',
     fontSize: 15,
     fontWeight: 'bold',
     color: '#fff',
@@ -53,26 +54,26 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: 'bold',
-    top: '15%',
+    top: '45%',
     left: '40%',
     position: 'absolute',
   },
   typeIconContainer: {
-    width: 35,
-    height: 35,
+    width: '23%',
+    height: '50%',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#ccc',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    top: -5,
-    right: -5,
+    top: 0,
+    right: 0,
     backgroundColor: 'white',
   },
   typeIcon: {
-    width: 50,
-    height: 50,
+    width: '100%',
+    height: '120%',
   },
 });
 
