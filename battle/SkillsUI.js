@@ -1,116 +1,100 @@
-import React, { useEffect } from 'react'
-import { Text, TouchableOpacity, StyleSheet, ImageBackground, View } from'react-native'
+// SkillsUI.js
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import attacksData from '../attacks.json';
-import { Image } from 'expo-image';
+import SkillCard from '../SkillCard';
 
-const SkillsUI = ({ onAttackPress, skills, disabled, multiplier }) => {
-    const iconMap = {
-        normal: require('../assets/normalskill.png'),
-        fire: require('../assets/fireskill.png'),
-        grass: require('../assets/grassskill.png'),
-    };
+const SkillsUI = ({ onAttackPress, skills, disabled }) => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 4;
 
-    useEffect(() => {
-      console.log(onAttackPress)
-    }, [onAttackPress])
+  const iconMap = {
+    normal: require('../assets/normalskill.png'),
+    fire: require('../assets/fireskill.png'),
+    grass: require('../assets/grassskill.png'),
+  };
 
-    return (
-        <ImageBackground
-            source={require('../assets/light-gradient.png')}
-            resizeMode="cover"
-            style={styles.bottomPart}>
-            {skills.map((skill, index) => {
-                const attack = attacksData.find(a => a.name === skill.name);
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[styles.button, disabled  && styles.disabledContainer]}
-                    onPress={() => !disabled ? onAttackPress(skill.name, attack.damage, attack.type, attack.multiplier) : null}
-                    disabled={disabled}>
-                    <Image source={require('../assets/wooden-board.png')} style={styles.buttonimage} />
-                    <Image source={iconMap[attack.type]} style={styles.roundskill} />
-                    <Text style={styles.buttonTextOverlay}>{skill.name}</Text>
-                  </TouchableOpacity>
-                );
-            })}
-        </ImageBackground>
-    )
+  const totalPages = Math.ceil(skills.length / itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
     }
+  };
 
-    const styles = StyleSheet.create({
-        bottomPart: {
-          flex: 3, // 40% of the screen
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'wrap', // Wrap the buttons to fit the screen
-          width: '100%',
-          // paddingHorizontal: 5, // Add padding to ensure the dashed lines don't touch the screen edges
-          backgroundColor: '#FFFFFF', // White text
-          color: '#000000', // Dark background
-        },
-        disabledContainer: {
-          opacity: 0.5, // Or any other visual effect you prefer
-      },
-        button: {
-          flex: 1,
-          alignItems: 'center',
-          minHeight: '50%',  // Ensure at least 50% height of each button
-          minWidth: '50%',
-          position: 'relative',
-        },
-        buttonTextOverlay: {
-            position: 'absolute',
-            color: '#FFFFFF', // White text for visibility
-            fontSize: 20, // Adjust the font size as needed
-            textAlign: 'center', // Center the text horizontally
-            width: '100%', // Cover the full width of the button
-            textShadowColor:'#000000',
-            textShadowOffset:{width: 2, height: 2},
-            textShadowRadius:3,
-            top: '60%',
-        },
-        buttonimage: {
-          flex: 1,
-          width: '100%',
-          height: '100%',
-          contentFit: 'contain',
-        },
-        paperimage: {
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-        },
-        roundskill: {
-            position: 'absolute',
-            width: '25%',
-            height: '25%',
-            contentFit: 'contain',
-            top:13
-        },
-        button2: {
-          flex: 1, // Take up 1/4th of the bottomPart's flex
-          alignItems: 'center', // Center content horizontally
-          minHeight: '50%', // Set minimum height
-          minWidth: '50%', // Set minimum width
-          position: 'relative',
-        },
-        button3: {
-          flex: 1, // Take up 1/4th of the bottomPart's flex
-          justifyContent: 'center', // Center content vertically
-          alignItems: 'center', // Center content horizontally
-          minHeight: '50%', 
-          minWidth: '50%', // Set minimum width
-        },
-        button4: {
-          flex: 1, // Take up 1/4th of the bottomPart's flex
-          justifyContent: 'center', // Center content vertically
-          alignItems: 'center', // Center content horizontally
-          minHeight: '50%', 
-          minWidth: '50%',
-      
-      
-        },
-        
-      });
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const renderSkills = () => {
+    const startIndex = currentPage * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return skills.slice(startIndex, endIndex).map((skill, index) => {
+      const attack = attacksData.find(a => a.name === skill.name);
+      return (
+        <SkillCard
+          key={index}
+          skill={skill}
+          attack={attack}
+          iconMap={iconMap}
+          onPress={() => !disabled ? onAttackPress(skill.name, attack.damage, attack.type, attack.multiplier) : null}
+          disabled={disabled}
+        />
+      );
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.skillsContainer}>
+        {renderSkills()}
+      </View>
+      <View style={styles.navigationContainer}>
+        <TouchableOpacity onPress={handlePreviousPage} disabled={currentPage === 0}>
+          <Text style={[styles.arrowLeft, currentPage === 0 && styles.disabledArrow]}>{'<'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleNextPage} disabled={currentPage >= totalPages - 1}>
+          <Text style={[styles.arrowRight, currentPage >= totalPages - 1 && styles.disabledArrow]}>{'>'}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#333', // Dark grey background
+    borderRadius: 10,
+    padding: 10,
+  },
+  skillsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  navigationContainer: {
+    position: 'absolute',
+    top: '90%',
+    left: '50%',
+    flexDirection: 'row',
+  },
+  arrowLeft: {
+    fontSize: 24,
+    color: '#fff',
+    right: '130%',
+  },
+  arrowRight: {
+    fontSize: 24,
+    color: '#fff',
+    left: '100%',
+  },
+  disabledArrow: {
+    color: '#888',
+  },
+});
 
 export default SkillsUI;

@@ -35,9 +35,10 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <View style={styles.fullscreen}>
-      {renderScreen()}
-    </View>
+      <StatusBar style="light" hidden={true} />
+      <View style={styles.fullscreen}>
+        {renderScreen()}
+      </View>
     </GestureHandlerRootView>
   );
 };

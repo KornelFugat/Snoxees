@@ -1,6 +1,6 @@
 // TeamUI.js
 import React from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import CharacterCard from '../CharacterCard';
 
 const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
@@ -13,7 +13,24 @@ const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
 
     return typeIconMap[type] || null;
   };
-  
+
+  const customCardStyles = {
+    card: {
+      height: '90%',
+      width: '100%',
+      margin: 0,
+    },
+    typeIconContainer: {
+      width: '19%',
+      height:'40%',
+    },
+    name: {
+      fontSize: 20,
+      top: '50%',
+    }
+    // Add other style overrides here as needed
+  };
+
   const renderTeamSlots = () => {
     let slots = [];
     for (let i = 0; i < 4; i++) {
@@ -21,15 +38,14 @@ const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
         slots.push(
           <TouchableOpacity
             key={`team-slot-${i}-${team[i].id}`}
-            style={[
-              styles.characterContainer,
-              i === currentPlayerIndex ? styles.activeCharacter : null
-            ]}
+            style={styles.characterContainer}
             onPress={() => onCharacterSwitch(i)}
           >
             <CharacterCard
               character={team[i]}
               getCharacterTypeIcon={getCharacterTypeIcon}
+              customStyles={customCardStyles}
+              isActive={i === currentPlayerIndex}
             />
           </TouchableOpacity>
         );
@@ -43,48 +59,33 @@ const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../assets/light-gradient.png')}
-      resizeMode="cover"
-      style={styles.bottomPart}>
+    <View style={styles.container}>
       {renderTeamSlots()}
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  bottomPart: {
+  container: {
     flex: 3,
-    display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: '100%',
-    backgroundColor: 'transparent',
-    color: '#000000',
-    top: 20
+    backgroundColor: '#333',
+    borderRadius: 10,
   },
   characterContainer: {
-    flex: 1,
+    width: '50%',
+    height: '50%',
+    padding: 5,
+    justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '45%',
-    minWidth: '50%',
-    position: 'relative',
-  },
-  activeCharacter: {
-    top: 30,
-    opacity: 0.5,
   },
   emptySlot: {
-    flex: 1,
-    minWidth: '50%',
-    padding: 10,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginTop: -10,
-    position: 'relative',
-    height: "40%",
+    width: '50%',
+    height: '50%',
+    padding: 5,
+
   },
 });
 

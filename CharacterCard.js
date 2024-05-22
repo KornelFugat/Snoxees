@@ -4,52 +4,58 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import HealthBar from './HealthBar';
 
-const CharacterCard = ({ character, getCharacterTypeIcon }) => {
+const CharacterCard = ({ character, getCharacterTypeIcon, customStyles = {}, isActive }) => {
+  const styles = { ...defaultStyles, ...customStyles };
+
   return (
-    <View style={styles.card}>
-      <Image source={character.currentImages.head} style={styles.characterImage} />
-      <Text style={styles.level}>{character.level}</Text>
-      <Text style={styles.name}>{character.name}</Text>
-      <HealthBar currentHealth={character.currentHealth} maxHealth={character.baseStats.maxHealth} style={styles.healthBar} />
-      <View style={styles.typeIconContainer}>
-        <Image source={getCharacterTypeIcon(character.type)} style={styles.typeIcon} />
+    <View style={[defaultStyles.card, styles.card, isActive && defaultStyles.activeCard]}>
+      <Image source={character.currentImages.head} style={[defaultStyles.characterImage, styles.characterImage]} />
+      <Text style={[defaultStyles.level, styles.level]}>{character.level}</Text>
+      <Text style={[defaultStyles.name, styles.name]}>{character.name}</Text>
+      <HealthBar currentHealth={character.currentHealth} maxHealth={character.baseStats.maxHealth} style={[defaultStyles.healthBar, styles.healthBar]} />
+      <View style={[defaultStyles.typeIconContainer, styles.typeIconContainer]}>
+        <Image source={getCharacterTypeIcon(character.type)} style={[defaultStyles.typeIcon, styles.typeIcon]} />
       </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const defaultStyles = StyleSheet.create({
   card: {
     width: '95%',
     padding: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#C7CED8',
     borderRadius: 8,
     borderColor: '#ccc',
     borderWidth: 1,
-    marginTop: -10,
     position: 'relative',
-    height: "40%"
+    height: '40%'
+  },
+  activeCard: {
+    backgroundColor: '#B8FF9A', // Green background for active card
   },
   healthBar: {
     position: 'absolute',
     width: '100%',
     top: '90%',
-    left: '10%', // Center it horizontally
+    left: '5%', // Center it horizontally
   },
   characterImage: {
     width: '30%',
     height: '70%',
-    borderRadius: 8,
+    borderRadius: 3,
+    borderWidth: 3, // Bold border
+    borderColor: '#000',
   },
   level: {
     position: 'absolute',
-    top: '50%',
-    left: '10%',
+    top: '60%',
+    left: '5%',
     fontSize: 15,
     fontWeight: 'bold',
     color: '#fff',
     backgroundColor: '#000',
-    borderRadius:10,
+    borderRadius: 10,
   },
   name: {
     fontSize: 18,

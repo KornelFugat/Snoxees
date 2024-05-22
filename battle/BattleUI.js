@@ -11,32 +11,24 @@ const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacter
   return (
     <View style={styles.container}>
       <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'skills' && styles.activeTab]}
-          onPress={() => setActiveTab('skills')}
-        >
-          <Text style={styles.tabText}>Skills</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'items' && styles.activeTab]}
-          onPress={() => setActiveTab('items')}
-        >
-          <Text style={styles.tabText}>Items</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'team' && styles.activeTab]}
-          onPress={() => setActiveTab('team')}
-        >
-          <Text style={styles.tabText}>Team</Text>
-        </TouchableOpacity>
-        <View style={styles.announcementContainer}>
-          <Text style={styles.announcementText}>{announcement}</Text>
+      {['skills', 'items', 'team'].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.tabOuter, activeTab === tab && styles.activeTabOuter]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <View style={styles.tabInner}>
+              <Text style={styles.tabText}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+        <View style={styles.announcementOuter}>
+          <View style={styles.announcementInner}>
+            <Text style={styles.announcementText}>{announcement}</Text>
+          </View>
         </View>
       </View>
-      <ImageBackground
-        source={require('../assets/light-gradient.png')}
-        style={styles.uiContainer}
-      >
+      <View style={styles.uiContainer}>
         {activeTab === 'skills' && (
           <SkillsUI
             onAttackPress={onAttackPress}
@@ -52,7 +44,7 @@ const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacter
             onCharacterSwitch={onCharacterSwitch}
           />
         )}
-      </ImageBackground>
+      </View>
     </View>
   );
 };
@@ -62,38 +54,78 @@ const styles = StyleSheet.create({
     flex: 4,
     width: '100%',
   },
-  tabs: {
-    flexDirection: 'row',
-    justifyContent: 'start',
-    backgroundColor: 'transparent',
-    paddingVertical: 0,
-    left: 5,
-  },
-  tab: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#1F1F1F',
-    backgroundColor: '#cccccc',
-    borderRadius: 5,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: 'blue',
-  },
-  tabText: {
-    fontSize: 16,
-  },
   uiContainer: {
     flex: 1,
     width: '100%',
+    backgroundColor: '#A9B2BC', // Medium grey background for the UI container
+    padding: 15,
   },
-  announcement: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 10,
-    borderRadius: 5,
+  tabs: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    backgroundColor: 'transparent',
+    paddingVertical: 0,
+    left: 5,
+    
+  },
+  tabOuter: {
+    minWidth: '15%',
+    borderWidth: 1,
+    borderColor: 'black', // Thin black border
+    borderRadius: 6,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    marginRight: 5,
+    backgroundColor: '#A9B2BC', // Outer border color
+    padding: 2,
+  },
+  activeTabOuter: {
+    borderBottomWidth: 0, // Remove bottom border when active
+  },
+  tabInner: {
+    backgroundColor: '#333', // Darker inner color
+    borderWidth: 3,
+    borderColor: '#A9B2BC', // Gray bold border
+    borderRadius: 4,
+    padding: 5,
+  },
+  tabText: {
+    fontSize: 16,
+    color: 'white',
+    textShadowColor:'#000000',
+    textShadowOffset:{width: 2, height: 2},
+    textShadowRadius:3,
+    textAlign: 'center',
+  },
+
+  announcementOuter: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'black', // Thin black border
+    borderRadius: 6,
+    marginLeft: 20,
+    marginRight: 5,
+    backgroundColor: '#ccc', // Outer border color
+    padding: 2,
+    justifyContent: 'center',
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  announcementInner: {
+    backgroundColor: '#333', // Darker inner color
+    borderWidth: 2,
+    borderColor: '#A9B2BC', // Gray bold border
+    borderRadius: 4,
+    padding: 10
+    
   },
   announcementText: {
     color: 'white',
+    fontSize: 10,
+    textShadowColor:'#000000',
+    textShadowOffset:{width: 2, height: 2},
+    textShadowRadius:3,
+    textAlign: 'center',
   },
   catchButton: {
     padding: 10,
@@ -111,13 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end', // Align to the right
     paddingHorizontal: 10, // Add some padding
   },
-  announcementText: {
-    color: 'white',
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
-    padding: 10,
-    borderRadius: 5,
-    minWidth: '50%',
-  },
+
 });
 
 export default BattleUI;
