@@ -1,12 +1,20 @@
 // BattleUI.js
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, ImageBackground, Dimensions } from 'react-native';
 import SkillsUI from './SkillsUI';
 import TeamUI from './TeamUI';
 import ItemsUI from './ItemsUI';
 
+const { width, height } = Dimensions.get('window');
+
+const responsiveFontSize = (size) => Math.round((size * width) / 375);
+
 const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacterSwitch, disabled, captureChance, handleCatchEnemy, announcement  }) => {
   const [activeTab, setActiveTab] = useState('skills'); // 'skills', 'items', or 'team'
+
+  const getAnnouncementFontSize = (text) => {
+    return text.length > 20 ? responsiveFontSize(8) : responsiveFontSize(10);
+  };
 
   return (
     <View style={styles.container}>
@@ -24,7 +32,7 @@ const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacter
         ))}
         <View style={styles.announcementOuter}>
           <View style={styles.announcementInner}>
-            <Text style={styles.announcementText}>{announcement}</Text>
+          <Text style={[styles.announcementText, { fontSize: getAnnouncementFontSize(announcement) }]}>{announcement}</Text>
           </View>
         </View>
       </View>
@@ -90,12 +98,13 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   tabText: {
-    fontSize: 16,
+    fontSize: responsiveFontSize(14),
     color: 'white',
     textShadowColor:'#000000',
     textShadowOffset:{width: 2, height: 2},
     textShadowRadius:3,
     textAlign: 'center',
+    fontFamily: 'Nunito-Black',
   },
 
   announcementOuter: {
@@ -121,11 +130,11 @@ const styles = StyleSheet.create({
   },
   announcementText: {
     color: 'white',
-    fontSize: 10,
     textShadowColor:'#000000',
     textShadowOffset:{width: 2, height: 2},
     textShadowRadius:3,
     textAlign: 'center',
+    fontFamily: 'Nunito-Black',
   },
   catchButton: {
     padding: 10,

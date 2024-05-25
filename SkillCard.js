@@ -1,19 +1,70 @@
 // SkillCard.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
+import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 
-const SkillCard = ({ skill, attack, iconMap, onPress, disabled }) => {
+const { width, height } = Dimensions.get('window');
+
+const responsiveFontSize = (size) => Math.round((size * width) / 375);
+
+const getBorderColor = (type) => {
+  switch(type) {
+    case 'fire':
+      return 'red';
+    case 'normal':
+      return 'grey';
+    case 'grass':
+      return '#90EE90';
+    case 'water':
+      return 'blue';
+    default:
+      return 'black';
+  }
+};
+
+const SkillCard = ({ skill, attack, iconMap, onPress, disabled, showDetails }) => {
   return (
     <TouchableOpacity
       style={[styles.card, disabled && styles.disabledCard]}
       onPress={onPress}
       disabled={disabled}
     >
+      {!showDetails ? (
+        <>
       <View style={styles.iconContainer}>
         <Image source={iconMap[attack.type]} style={styles.skillIcon} />
       </View>
-      <Text style={styles.skillName}>{skill.name.toUpperCase()}</Text>
+      <View style={styles.textContainer}>
+      <StrokeText
+        text={skill.name.toUpperCase()}
+        fontSize={17}
+        color="#FFFFFF"
+        strokeColor="#333000"
+        strokeWidth={3}
+        style={styles.skillName}
+        fontFamily='Nunito-Black'
+        align="center"
+        numberOfLines={2}
+        width={130}
+      />
+      </View>
+      </>
+      ) : (
+        <View style={styles.detailsContainer}>
+            <View style={[styles.powerContainer, { borderColor: getBorderColor(attack.type) }]}>
+              <Text style={styles.dText}>Attack Power</Text>
+              <Text style={styles.dValue}>{attack.damage}</Text>
+            </View>
+            <View style={[styles.accuracyContainer, { borderColor: getBorderColor(attack.type) }]}>
+              <Text style={styles.dText}>Accuracy</Text>
+              <Text style={styles.dValue}>{attack.accuracy * 100}%</Text>
+            </View>
+          <View style={[styles.descriptionContainer, { borderColor: getBorderColor(attack.type) }]}>
+          <Text style={styles.description}>{attack.name.toUpperCase()}</Text>
+          </View>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
@@ -29,14 +80,14 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    flexDirection: 'row', // Ensures icon and text are in a row
+    flexDirection: 'row',
     padding: 10,
   },
   iconContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     width: '50%',
-    height: '150%',
+    height: '160%',
     right: '35%',
     borderRadius: 50,
     backgroundColor: '#333',
@@ -50,22 +101,86 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   skillIcon: {
-    width: '130%',
+    width: '140%',
     height: '130%',
     maxHeight: 100,
     maxWidth: 100,
     contentFit: 'cover',
-    borderRadius: 18, // Circular border
+    borderRadius: 18,
   },
-  skillName: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    textShadowColor: '#000000',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 3,
+  
+  textContainer: {
     flex: 1, // Ensures the text takes the remaining space
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailsContainer: {
+    width: '110%',
+    height: '130%',
+    maxWidth: 250,
+    maxHeight: 90,
+    backgroundColor: '#C7CED8',
+    borderRadius: 8,
+    padding: 0,
+  },
+  powerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: '#333',
+    width: '49%',
+    height: '55%',
+    maxHeight: 50,
+    maxWidth: 150,
+    borderRadius: 8,
+    borderWidth: 1
+  },
+  
+  accuracyContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#333',
+    width: '49%',
+    height: '55%',
+    maxHeight: 50,
+    maxWidth: 150,
+    borderRadius: 8,
+    borderWidth: 1
+  },
+  dText: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontSize: responsiveFontSize(7),
+    fontFamily: 'Nunito-Black',
+    
+  },
+  dValue: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontSize: responsiveFontSize(10),
+    top: '10%',
+    fontFamily: 'Nunito-Black',
+  },
+  descriptionContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    backgroundColor: '#333',
+    width: '100%',
+    height: '40%',
+    maxHeight: 50,
+    maxWidth: 260,
+    borderRadius: 8,
+    borderWidth: 2
+  },
+  description: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontSize: responsiveFontSize(8),
+    top: '20%',
+    fontFamily: 'Nunito-Black',
+    
   },
 });
 

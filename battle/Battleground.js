@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     playerContainer: {
       flex:1,
       position: 'absolute',
-      top: '20%',
+      top: '5%',
       left: '2%',
       width: '40%',
       height:'40%'
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     },
     enemyContainer: {
       position: 'absolute',
-      top: '20%',
+      top: '5%',
       right: '0%',
       width: '40%',
       height:'40%'

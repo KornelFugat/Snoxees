@@ -117,11 +117,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 12,
     fontWeight: 'bold',
+    fontFamily: 'Nunito-Black',
+  },
+  characterName: {
+    fontFamily: 'Nunito-Black',
   },
   subHeader: {
     fontSize: 16,
     marginBottom: 8,
     fontWeight: 'bold',
+    fontFamily: 'Nunito-Black',
+
   },
   teamGrid: {
     flexDirection: 'row',

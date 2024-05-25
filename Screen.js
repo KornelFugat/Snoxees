@@ -131,6 +131,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#4A7729',
     fontSize: 18,
+    fontFamily: 'Nunito-Black',
   },
 });
 

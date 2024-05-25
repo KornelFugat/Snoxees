@@ -20,14 +20,25 @@ const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
       width: '100%',
       margin: 0,
     },
-    typeIconContainer: {
-      width: '19%',
-      height:'40%',
+    typeIconContainer:{
+      maxWidth: 53,
     },
     name: {
-      fontSize: 20,
       top: '50%',
-    }
+    },
+    levelContainer: {
+      position: 'absolute',
+      top: '58%',
+      left: '5%',
+      width: '10%',
+      height: '20%',
+      maxWidth: 20,
+      maxHeight: 20,
+      justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+    },
+
     // Add other style overrides here as needed
   };
 

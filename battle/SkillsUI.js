@@ -3,10 +3,14 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import attacksData from '../attacks.json';
 import SkillCard from '../SkillCard';
+import { Image } from 'expo-image';
 
 const SkillsUI = ({ onAttackPress, skills, disabled }) => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [showDetails, setShowDetails] = useState(false);
+
   const itemsPerPage = 4;
+
 
   const iconMap = {
     normal: require('../assets/normalskill.png'),
@@ -28,6 +32,10 @@ const SkillsUI = ({ onAttackPress, skills, disabled }) => {
     }
   };
 
+ const toggleShowDetails = () => {
+    setShowDetails(!showDetails);
+  };
+
   const renderSkills = () => {
     const startIndex = currentPage * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -41,6 +49,7 @@ const SkillsUI = ({ onAttackPress, skills, disabled }) => {
           iconMap={iconMap}
           onPress={() => !disabled ? onAttackPress(skill.name, attack.damage, attack.type, attack.multiplier) : null}
           disabled={disabled}
+          showDetails={showDetails}
         />
       );
     });
@@ -51,14 +60,15 @@ const SkillsUI = ({ onAttackPress, skills, disabled }) => {
       <View style={styles.skillsContainer}>
         {renderSkills()}
       </View>
-      <View style={styles.navigationContainer}>
         <TouchableOpacity onPress={handlePreviousPage} disabled={currentPage === 0}>
-          <Text style={[styles.arrowLeft, currentPage === 0 && styles.disabledArrow]}>{'<'}</Text>
+          <Text style={[styles.arrowLeft, currentPage === 0 && styles.disabledArrow]}>{'←'}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleNextPage} disabled={currentPage >= totalPages - 1}>
-          <Text style={[styles.arrowRight, currentPage >= totalPages - 1 && styles.disabledArrow]}>{'>'}</Text>
+          <Text style={[styles.arrowRight, currentPage >= totalPages - 1 && styles.disabledArrow]}>{'→'}</Text>
         </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={toggleShowDetails} style={styles.detailsButton}>
+          <Image source={require('../assets/flipping-arrows.png')} contentFit='cover' style={styles.flipImage} />
+        </TouchableOpacity>
     </View>
   );
 };
@@ -76,25 +86,45 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  navigationContainer: {
-    position: 'absolute',
-    top: '90%',
-    left: '50%',
-    flexDirection: 'row',
-  },
   arrowLeft: {
-    fontSize: 24,
+    position: 'absolute',
+    bottom: '0%',
+    fontSize: 60,
     color: '#fff',
-    right: '130%',
+    right: '50%',
+    fontFamily: 'Nunito-Black',
   },
   arrowRight: {
-    fontSize: 24,
+    position: 'absolute',
+    fontSize: 60,
     color: '#fff',
-    left: '100%',
+    bottom: '0%',
+    left: '50%',
+    fontFamily: 'Nunito-Black',
   },
   disabledArrow: {
     color: '#888',
   },
+  detailsButton: {
+    position: 'absolute',
+    backgroundColor: '#333',
+    borderRadius: 5,
+    bottom: '1%',
+    right: '1%',
+    width: '13%',
+    height: '25%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  flipImage: {
+   width: '100%',
+   height: '100%', 
+  },
+  detailsButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+
 });
 
 export default SkillsUI;

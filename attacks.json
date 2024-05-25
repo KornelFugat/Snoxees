@@ -3,18 +3,24 @@
         "name": "Punch",
         "type": "normal",
         "damage": 20,
-        "multiplier": 0.1
+        "multiplier": 0.1,
+        "accuracy": 1,
+        "description": "Simple normal attack"
     },
     {
         "name": "Small Fireball",
         "type": "fire",
         "damage": 120,
-        "multiplier": 0.15
+        "multiplier": 0.15,
+        "accuracy": 1,
+        "description": "Simple fire attack"
     },
     {
         "name": "Thorns",
         "type": "grass",
         "damage": 12,
-        "multiplier": 0.15
+        "multiplier": 0.15,
+        "accuracy": 1,
+        "description": "Simple nature attack"
     }
 ]

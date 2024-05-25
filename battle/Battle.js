@@ -1,10 +1,16 @@
 // Battle.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { useBattleLogic } from './BattleLogic';
 import Battleground from './Battleground';
 import BattleUI from './BattleUI';
 import { useMainStore } from '../stores/useMainStore';
+import {Image} from 'expo-image';
+import { StrokeText } from '@charmy.tech/react-native-stroke-text';
+
+const { width, height } = Dimensions.get('window');
+
+const responsiveFontSize = (size) => Math.round((size * width) / 375);
 
 const Battle = ({ onGoBack, onBattleEnd }) => {
   const {
@@ -27,7 +33,7 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
   return (
     <ImageBackground
         source={require('../assets/backgroundtoptest.png')}
-        resizeMode="contain"
+        resizeMode="cover"
         style={styles.container}>
       <Battleground 
         currentTurn={currentTurn} 
@@ -47,14 +53,22 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
         handleCatchEnemy={handleCatchEnemy}
         announcement={announcement}
       />
+      <Image source={require('../assets/catch-book.png')} style={styles.catchBook} contentFit="cover"/>
       <TouchableOpacity style={styles.catchButton} onPress={handleCatchEnemy}>
-        <Text style={styles.text}>Catch Enemy</Text>
-        <Text style={styles.captureChanceText}>{`Capture Chance: ${(captureChance * 100).toFixed(0)}%`}</Text>
+        <StrokeText
+          text="Capture!"
+          fontSize={responsiveFontSize(15)}
+          color="#FFFFFF"
+          strokeColor="#333000"
+          strokeWidth={3}
+          fontFamily='Nunito-Black'
+          align='center'
+          numberOfLines={1}
+          width={width*0.2}
+          />
       </TouchableOpacity>
+      {/* <Text style={styles.captureChanceText}>{`Capture Chance: ${(captureChance * 100).toFixed(0)}%`}</Text> */}
       
-      <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
-        <Text style={styles.text}>Back to Home</Text>
-      </TouchableOpacity>
     </ImageBackground>
   );
 };
@@ -76,21 +90,36 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#6C541E', // Bronze border
   },
+  catchBook: {
+    position: 'absolute',
+    top: '2%',
+    width: '20%',
+    height: '13%',
+  },
   catchButton: {
     position: 'absolute',
-    top: 40, // Adjust based on your UI needs
-    left: 20, // Adjust based on your UI needs
-    backgroundColor: '#1F1F1F', // Dark button background
-    padding: 10,
+    top: '14%', // Adjust based on your UI needs
+    backgroundColor: '#20293F', // Dark button background
+    padding: 5,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: '#6C541E', // Bronze border
+    width: '20%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  captureChanceText: {
+    color: '#FFFFFF', // White text
+    fontSize: 12, // Adjust font size as needed
+    textAlign: 'center',
+    fontFamily: 'Nunito-Black',
   },
   text: {
     color: '#FFFFFF', // White text
-    fontSize: 24, // Adjust font size as needed
+    fontSize: 10, // Adjust font size as needed
     textAlign: 'center',
     paddingHorizontal: 20,
+    fontFamily: 'Nunito-Black',
   },
 });
 

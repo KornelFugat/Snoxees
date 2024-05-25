@@ -21,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.Snoxees.dev"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -36,6 +37,19 @@
       "visible": "immersive",
       "barStyle": "light-content",
       "backgroundColor": "#000000"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b686dcd9-e37f-49e7-8d1f-b7fdd00d18e4"
+      }
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": ["./assets/fonts/Nunito-Black.ttf"]
+        }
+      ]
+    ]
   }
 }
