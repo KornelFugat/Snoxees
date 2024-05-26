@@ -1,5 +1,5 @@
 // Battle.js
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { useBattleLogic } from './BattleLogic';
 import Battleground from './Battleground';
@@ -13,6 +13,13 @@ const { width, height } = Dimensions.get('window');
 const responsiveFontSize = (size) => Math.round((size * width) / 375);
 
 const Battle = ({ onGoBack, onBattleEnd }) => {
+  const triggerStartAnimation = useRef(false);
+  const triggerEndAnimation = useRef(null)
+
+  useEffect(() => {
+    console.log(4, triggerEndAnimation)
+  }, [triggerEndAnimation.current]);
+
   const {
     handleAttackRef,
     currentTurn,
@@ -23,7 +30,7 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
     handlePlayerAttack,
     handleCatchEnemy,
     handleCharacterSwitch,
-  } = useBattleLogic(onBattleEnd);
+  } = useBattleLogic(onBattleEnd, triggerStartAnimation, triggerEndAnimation);
 
   const { team, enemy } = useMainStore(state => ({
     team: state.team,
@@ -41,6 +48,8 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
         playerImage={team.length > 0 ? team[currentPlayerIndex].currentImages.full : 'paper.png'} 
         enemyImage={enemy.currentImages.full}
         currentPlayerIndex={currentPlayerIndex}
+        triggerStartAnimation={triggerStartAnimation}
+        triggerEndAnimation={triggerEndAnimation}
       />
       <BattleUI
         onAttackPress={handlePlayerAttack}
@@ -67,7 +76,7 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
           width={width*0.2}
           />
       </TouchableOpacity>
-      {/* <Text style={styles.captureChanceText}>{`Capture Chance: ${(captureChance * 100).toFixed(0)}%`}</Text> */}
+      <Text style={styles.captureChanceText}>{`${(captureChance * 100).toFixed(0)}%`}</Text>
       
     </ImageBackground>
   );
@@ -109,10 +118,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   captureChanceText: {
+    position: 'absolute',
     color: '#FFFFFF', // White text
-    fontSize: 12, // Adjust font size as needed
+    fontSize: responsiveFontSize(10), // Adjust font size as needed
     textAlign: 'center',
     fontFamily: 'Nunito-Black',
+    backgroundColor: '#20293F',
+    borderRadius: 5,
+    padding: 5,
+    top: '17.5%',
   },
   text: {
     color: '#FFFFFF', // White text

@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 import { useMainStore } from '../stores/useMainStore';
 import attacksData from '../attacks.json';
 
-export const useBattleLogic = (onBattleEnd) => {
+export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAnimation) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const handleAttackRef = useRef(null);
   const [currentTurn, setCurrentTurn] = useState('player'); // 'player' or 'enemy'
@@ -25,6 +25,12 @@ export const useBattleLogic = (onBattleEnd) => {
     addExperienceToTeam: state.addExperienceToTeam,
     addCharacterToOwned: state.addCharacterToOwned
   }));
+
+  useEffect(() => {
+    console.log(2, triggerStartAnimation)
+    
+    console.log(3, triggerStartAnimation)
+  }, [triggerStartAnimation]);
 
 
   //ANNOUNCEMENTS
@@ -53,7 +59,11 @@ export const useBattleLogic = (onBattleEnd) => {
 
   useEffect(() => {
     if (team.length > 0) {
+        triggerStartAnimation.current = true
         addAnnouncement('Get ready!');
+        setTimeout(() => {
+        }, 1000)
+        
       setTimeout(() => {
         setIsInitialized(true);
       }, 3000);
@@ -67,6 +77,7 @@ export const useBattleLogic = (onBattleEnd) => {
   useEffect(() => {
     if (isInitialized && enemy.currentHealth <= 0) {
         addAnnouncement('Victory!');
+        triggerEndAnimation.current = 'defeated';
       setTimeout(() => {
         onBattleEnd();
         addExperienceToTeam(100);
@@ -150,14 +161,22 @@ export const useBattleLogic = (onBattleEnd) => {
   const handleCatchEnemy = () => {
     const chance = calculateCaptureChance();
     if (Math.random() < chance) {
+      triggerEndAnimation.current = 'captureSuccess';
       addCharacterToOwned(enemy.name);
-      Alert.alert("Success", `${enemy.name} has been added to your team!`);
-      onBattleEnd();
+      // Alert.alert("Success", `${enemy.name} has been added to your team!`);
+      setTimeout(() => {
+        onBattleEnd();
+      }, 7000)
+      
     } else {
-      Alert.alert("Failed", `${enemy.name} escaped!`);
+      triggerEndAnimation.current = 'captureFailed';
+      // Alert.alert("Failed", `${enemy.name} escaped!`);
       setCaptureChanceModifier(prevModifier => Math.max(0, prevModifier * 0.75));
       setSkillsDisabled(true);
-      setCurrentTurn('enemy');
+      setTimeout(() => {
+        addAnnouncement(`${enemy.name} escaped!`, 2000);
+        setCurrentTurn('enemy');
+      }, 7000)
     }
   };
 

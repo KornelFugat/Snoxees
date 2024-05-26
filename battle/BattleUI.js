@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
+    
   },
   announcementInner: {
     backgroundColor: '#333', // Darker inner color
@@ -135,6 +136,7 @@ const styles = StyleSheet.create({
     textShadowRadius:3,
     textAlign: 'center',
     fontFamily: 'Nunito-Black',
+    maxHeight: 50,
   },
   catchButton: {
     padding: 10,

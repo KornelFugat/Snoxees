@@ -60,8 +60,9 @@ const defaultStyles = StyleSheet.create({
   },
   healthBar: {
     position: 'absolute',
-    width: '100%',
-    top: '90%',
+    width: '105%',
+    maxWidth: 250,
+    top: '95%',
     left: '5%', // Center it horizontally
   },
   imageContainer: {
@@ -110,7 +111,7 @@ const defaultStyles = StyleSheet.create({
     position: 'absolute',
   },
   typeIconContainer: {
-    width: '23%',
+    width: '26%',
     height: '50%',
     maxWidth: 49,
     maxHeight: 50,

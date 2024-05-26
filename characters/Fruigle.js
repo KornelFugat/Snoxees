@@ -49,8 +49,7 @@ const evolution1Images = {
       { level: 5, name: "Thorns" },
       { level: 9, name: "Small Fireball" },
       { level: 1, name: "Punch" },
-      { level: 5, name: "Thorns" },
-      { level: 9, name: "Small Fireball" }
+
       
     ],
     evolutions: [

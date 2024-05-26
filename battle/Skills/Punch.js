@@ -96,14 +96,14 @@ const styles = StyleSheet.create({
   attacker: {
     width: '30%',
     height: '25%',
-    top: '65%',
+    top: '63%',
     left: '10%',
     position: 'absolute',
   },
   enemy: {
     width: '30%',
     height: '25%',
-    top: '65%',
+    top: '63%',
     right: '10%',
     position: 'absolute',
     transform: [{ scaleX: -1 }]
