@@ -92,12 +92,31 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
 
     //END BATTLE ANIMATIONS
     const endAnimations = (type) => {
-      if (type === 'defeated') {
+      if (type === 'enemyDefeated') {
         enemyScale.value = withSequence(
           withTiming(1.2, { duration: 600, easing: Easing.ease }),
           withTiming(0, { duration: 600, easing: Easing.ease })
         );
         enemyOpacity.value = withTiming(0, { duration: 300 });
+      } else if (type === 'playerDefeated') {
+        console.log(15)
+        playerScale.value = withSequence(
+          withTiming(1.2, { duration: 600, easing: Easing.ease }),
+          withTiming(0, { duration: 600, easing: Easing.ease })
+        )
+        playerOpacity.value = withTiming(1, { duration: 300 });
+        setTimeout(() => {
+          playerScale.value = withSequence(
+            withTiming(1, { duration: 600, easing: Easing.ease }),
+          )
+        }, 3000)
+      } else if (type === 'lastPlayerDefeated') {
+        console.log(16)
+        playerScale.value = withSequence(
+          withTiming(1.2, { duration: 600, easing: Easing.ease }),
+          withTiming(0, { duration: 600, easing: Easing.ease })
+        )
+        playerOpacity.value = withTiming(0, { duration: 300 });
       } else if (type === 'captureSuccess') {
         enemyScale.value = withSequence(
           withTiming(0, { duration: 1000, easing: Easing.ease }),
@@ -116,6 +135,9 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
           withTiming(1, { duration: 1000, easing: Easing.ease }), // doubled duration
           withTiming(0, { duration: 1000, easing: Easing.ease })
         );
+        setTimeout(() => {
+          enemyOpacityMain.value = withTiming(0, { duration: 500, easing: Easing.ease });
+        }, 6400)
       } else if (type === 'captureFailed') {
         enemyScale.value = withSequence(
           withSpring(0, { duration: 1000, easing: Easing.ease }),
@@ -248,7 +270,6 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
             setIsFireballActive(true);
             console.log("uses Fireball");
             await new Promise(resolve => setTimeout(resolve, 2000));
-            setTurn(!turn);
             break;
         case "Thorns":
             console.log("uses Thorns");
@@ -273,7 +294,9 @@ const Battleground = ({ triggerAttack, currentTurn, playerImage, enemyImage, cur
     triggerAttack(handleAttack);
 
     useEffect(() => {
-      setTurn(currentTurn === 'player');
+      if (currentTurn !== 'end') {
+        setTurn(currentTurn === 'player');
+      }
     }, [currentTurn]);
 
     const getCharacterTypeIcon = (type) => {

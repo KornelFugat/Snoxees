@@ -13,7 +13,7 @@ const BattleUI = ({ onAttackPress, skills, team, currentPlayerIndex, onCharacter
   const [activeTab, setActiveTab] = useState('skills'); // 'skills', 'items', or 'team'
 
   const getAnnouncementFontSize = (text) => {
-    return text.length > 20 ? responsiveFontSize(8) : responsiveFontSize(10);
+    return text.length > 23 ? responsiveFontSize(8) : responsiveFontSize(9);
   };
 
   return (

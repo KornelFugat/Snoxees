@@ -16,8 +16,8 @@ const HealthBar = ({ currentHealth, maxHealth, style }) => {
   const color = `rgb(${red}, ${green}, 0)`;
 
   return (
-    <View style={[styles.container, style]}>
-      <View style={[styles.healthIcon, {backgroundColor: color}]}>
+    <>
+    <View style={[styles.healthIcon, {backgroundColor: color}]}>
         <StrokeText
             text="+"
             fontSize={responsiveFontSize(25)}
@@ -31,6 +31,7 @@ const HealthBar = ({ currentHealth, maxHealth, style }) => {
             width={100}
             />
       </View>
+    <View style={[styles.container, style]}> 
       <View style={[styles.healthBar, { width: `${healthPercentage}%`, backgroundColor: color }]}/>   
       <StrokeText
           text={`${currentHealth}/${maxHealth}`}
@@ -45,6 +46,7 @@ const HealthBar = ({ currentHealth, maxHealth, style }) => {
           width={100}
           />
     </View>
+    </>
   );
 };
 
@@ -57,27 +59,29 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     borderWidth: 1,
     borderColor: '#333',
+    left: '15%',
   },
   healthBar: {
     height: '100%',
+    width: '100%',
     borderRadius: 7,
   },
   healthText: {
     position: 'absolute',
     top: '50%',
     zIndex: 1,
-    left: '80%',
+    left: '79%',
   },
   healthIcon: {
     position: 'absolute',
-    height: '220%',
+    height: '33%',
     width: '15%',
     minWidth:20,
     maxHeight: 30,
     maxWidth: 30,
     zIndex: 1,
-    top: '-50%',
-    left: '-2%',
+    top: '88%',
+    left: '5%',
     borderRadius: 50,
     borderWidth: 2,
     borderColor: '#333',

@@ -46,9 +46,9 @@ const evolution1Images = {
     currentImages: evolution1Images,
     skills: [
       { level: 1, name: "Punch" },
-      { level: 5, name: "Thorns" },
+      // { level: 5, name: "Thorns" },
       { level: 9, name: "Small Fireball" },
-      { level: 1, name: "Punch" },
+      // { level: 1, name: "Punch" },
 
       
     ],

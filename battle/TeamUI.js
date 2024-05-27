@@ -38,6 +38,12 @@ const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
     alignItems: 'center',
     backgroundColor: '#000',
     },
+    healthBar: {
+      top: '94%',
+      width: '94%',
+      maxWidth: 230,
+
+    },
 
     // Add other style overrides here as needed
   };

@@ -60,10 +60,9 @@ const defaultStyles = StyleSheet.create({
   },
   healthBar: {
     position: 'absolute',
-    width: '105%',
-    maxWidth: 250,
+    width: '96%',
+    maxWidth: 190,
     top: '95%',
-    left: '5%', // Center it horizontally
   },
   imageContainer: {
     width: '100%',
@@ -73,7 +72,7 @@ const defaultStyles = StyleSheet.create({
     left: '0%',
   },
   characterImage: {
-    width: '33%',
+    width: '35%',
     height: '75%',
     maxHeight: 80,
     maxWidth: 80,
