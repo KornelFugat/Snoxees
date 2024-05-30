@@ -11,10 +11,14 @@ export const createAccountStore = (set, get) => ({
     gold: 0,
     diamonds: 0,
     nextCharacterId: 1,
+    battleExperience: 0,
+    battleResult: '',
 
     updatePlayerName: (name) => set({ playerName: name }),
     updateGold: (amount) => set(state => ({ gold: state.gold + amount })),
     updateDiamonds: (amount) => set(state => ({ diamonds: state.diamonds + amount })),
+    updateBattleExperience: (amount) => set({ battleExperience: amount }),
+    updateBattleResult: (result) => set(() => ({battleResult: result})),
 
     addCharacterToOwned: (characterName) => {
         const character = characters[characterName];

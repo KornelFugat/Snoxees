@@ -18,13 +18,16 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
   const [turnCounter, setTurnCounter] = useState(0)
 
 
-  const { team, enemy, updateEnemyHealth, updateHealth, addExperienceToTeam, addCharacterToOwned } = useMainStore(state => ({
+  const { team, enemy, updateEnemyHealth, updateHealth, battleResult, addExperienceToTeam, addCharacterToOwned, updateBattleExperience, updateBattleResult } = useMainStore(state => ({
     team: state.team,
     enemy: state.enemy,
+    updateBattleExperience: state.updateBattleExperience,
     updateEnemyHealth: state.updateEnemyHealth,
     updateHealth: state.updateHealth,
     addExperienceToTeam: state.addExperienceToTeam,
-    addCharacterToOwned: state.addCharacterToOwned
+    addCharacterToOwned: state.addCharacterToOwned,
+    updateBattleResult: state.updateBattleResult,
+    battleResult: state.battleResult
   }));
 
   useEffect(() => {
@@ -69,6 +72,10 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
       onBattleEnd();
     }
   }, []);
+
+  useEffect(() => {
+    console.log("skillsDisabled", skillsDisabled)
+  }, [skillsDisabled])
   
   //WHAT IF HP GOES TO 0
 
@@ -77,8 +84,10 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
         addAnnouncement(`${enemy.name} has been defeated!`, 3000);
         triggerEndAnimation.current = 'enemyDefeated';
       setTimeout(() => {
+        updateBattleResult('victory')
+        updateBattleExperience(10);
+        addExperienceToTeam(10);
         onBattleEnd();
-        addExperienceToTeam(100);
       }, 5000);
     } else if (isInitialized && team[currentPlayerIndex].currentHealth <= 0) {
       addAnnouncement(`${team[currentPlayerIndex].name} has been defeated!`, 4000);
@@ -126,7 +135,8 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
     setSkillsDisabled(true);
     setTimeout(() => {
       const newEnemyHealth = Math.max(0, enemy.currentHealth - actualDamage);
-      addAnnouncement(newEnemyHealth > 0 ? `Wild ${enemy.name} turn!` : 'Victory!', 3000);
+      addAnnouncement(newEnemyHealth > 0 ? `Wild ${enemy.name} turn!` : 'Victory!', 2000);
+      newEnemyHealth > 0 ? updateBattleResult('victory') : null
     },3000)
     setTimeout(() => {
       const newEnemyHealth = Math.max(0, enemy.currentHealth - actualDamage);
@@ -176,7 +186,8 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
   }, [team, enemy.currentHealth, captureChanceModifier]);
 
   const handleCatchEnemy = () => {
-    const chance = 1;
+    const chance = calculateCaptureChance();
+    setSkillsDisabled(true);
     addAnnouncement(`Capturing ${enemy.name}...`, 6300);
     if (Math.random() < chance) {
       triggerEndAnimation.current = 'captureSuccess';
@@ -184,8 +195,8 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
       // Alert.alert("Success", `${enemy.name} has been added to your team!`);
       setTimeout(() => {
         addAnnouncement(`${enemy.name} captured!`, 8500);
+        updateBattleResult('captured')
       }, 1000)
-      
       setTimeout(() => {
         onBattleEnd();
       }, 8500)
@@ -203,6 +214,9 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
     }
   };
 
+  useEffect(() => {
+    console.log("battleResult", battleResult)
+  }, [battleResult])
   //SWITCHING CHARACTERS
 
   const handleCharacterSwitch = (index) => {
@@ -240,6 +254,7 @@ export const useBattleLogic = (onBattleEnd, triggerStartAnimation, triggerEndAni
       } else {
         triggerEndAnimation.current = 'lastPlayerDefeated';
         addAnnouncement('Defeat!', 5000);
+        updateBattleResult('defeat')
         setTimeout(() => {
           console.log(19)
           onBattleEnd();

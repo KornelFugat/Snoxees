@@ -3,6 +3,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,33 +26,33 @@ const getBorderColor = (type) => {
 
 const SkillCard = ({ skill, attack, iconMap, onPress, disabled, showDetails }) => {
   return (
-    <TouchableOpacity
-      style={[styles.card, disabled && styles.disabledCard]}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      {!showDetails ? (
-        <>
-      <View style={styles.iconContainer}>
-        <Image source={iconMap[attack.type]} style={styles.skillIcon} />
-      </View>
-      <View style={styles.textContainer}>
-      <StrokeText
-        text={skill.name.toUpperCase()}
-        fontSize={17}
-        color="#FFFFFF"
-        strokeColor="#333000"
-        strokeWidth={3}
-        style={styles.skillName}
-        fontFamily='Nunito-Black'
-        align="center"
-        numberOfLines={2}
-        width={130}
-      />
-      </View>
-      </>
-      ) : (
-        <View style={styles.detailsContainer}>
+    <TouchableOpacity onPress={onPress} disabled={disabled} style={styles.touchable}>
+      <LinearGradient
+        colors={['#ffffff', '#9DA3AB']}
+        style={[styles.card, disabled && styles.disabledCard]}
+      >
+        {!showDetails ? (
+          <>
+            <View style={styles.iconContainer}>
+              <Image source={iconMap[attack.type]} style={styles.skillIcon} />
+            </View>
+            <View style={styles.textContainer}>
+              <StrokeText
+                text={skill.name.toUpperCase()}
+                fontSize={17}
+                color="#FFFFFF"
+                strokeColor="#333000"
+                strokeWidth={3}
+                style={styles.skillName}
+                fontFamily='Nunito-Black'
+                align="center"
+                numberOfLines={2}
+                width={130}
+              />
+            </View>
+          </>
+        ) : (
+          <View style={styles.detailsContainer}>
             <View style={[styles.powerContainer, { borderColor: getBorderColor(attack.type) }]}>
               <Text style={styles.dText}>Attack Power</Text>
               <Text style={styles.dValue}>{attack.damage}</Text>
@@ -60,21 +61,25 @@ const SkillCard = ({ skill, attack, iconMap, onPress, disabled, showDetails }) =
               <Text style={styles.dText}>Accuracy</Text>
               <Text style={styles.dValue}>{attack.accuracy * 100}%</Text>
             </View>
-          <View style={[styles.descriptionContainer, { borderColor: getBorderColor(attack.type) }]}>
-          <Text style={styles.description}>{attack.name.toUpperCase()}</Text>
+            <View style={[styles.descriptionContainer, { borderColor: getBorderColor(attack.type) }]}>
+              <Text style={styles.description}>{attack.name.toUpperCase()}</Text>
+            </View>
           </View>
-        </View>
-      )}
+        )}
+      </LinearGradient>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
+  touchable: {
     width: '47%',
     height: '35%',
     margin: '1%',
-    backgroundColor: '#C7CED8',
+    borderRadius: 8,
+  },
+  card: {
+    flex: 1,
     borderRadius: 8,
     borderColor: '#ccc',
     borderWidth: 2,
@@ -108,7 +113,6 @@ const styles = StyleSheet.create({
     contentFit: 'cover',
     borderRadius: 18,
   },
-  
   textContainer: {
     flex: 1, // Ensures the text takes the remaining space
     justifyContent: 'center',
@@ -133,9 +137,8 @@ const styles = StyleSheet.create({
     maxHeight: 50,
     maxWidth: 150,
     borderRadius: 8,
-    borderWidth: 1
+    borderWidth: 1,
   },
-  
   accuracyContainer: {
     position: 'absolute',
     top: 0,
@@ -146,14 +149,13 @@ const styles = StyleSheet.create({
     maxHeight: 50,
     maxWidth: 150,
     borderRadius: 8,
-    borderWidth: 1
+    borderWidth: 1,
   },
   dText: {
     color: '#FFFFFF',
     textAlign: 'center',
     fontSize: responsiveFontSize(7),
     fontFamily: 'Nunito-Black',
-    
   },
   dValue: {
     color: '#FFFFFF',
@@ -172,7 +174,7 @@ const styles = StyleSheet.create({
     maxHeight: 50,
     maxWidth: 260,
     borderRadius: 8,
-    borderWidth: 2
+    borderWidth: 2,
   },
   description: {
     color: '#FFFFFF',
@@ -180,7 +182,6 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(8),
     top: '20%',
     fontFamily: 'Nunito-Black',
-    
   },
 });
 

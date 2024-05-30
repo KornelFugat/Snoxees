@@ -15,8 +15,11 @@ const HealthBar = ({ currentHealth, maxHealth, style }) => {
   const green = Math.round((healthPercentage / 100) * 255);
   const color = `rgb(${red}, ${green}, 0)`;
 
+  const healthText = `${currentHealth}/${maxHealth}`;
+
+
   return (
-    <>
+    <View style={[styles.mainContainer, style]}>
     <View style={[styles.healthIcon, {backgroundColor: color}]}>
         <StrokeText
             text="+"
@@ -31,28 +34,35 @@ const HealthBar = ({ currentHealth, maxHealth, style }) => {
             width={100}
             />
       </View>
-    <View style={[styles.container, style]}> 
+    <View style={[styles.container]}> 
       <View style={[styles.healthBar, { width: `${healthPercentage}%`, backgroundColor: color }]}/>   
-      <StrokeText
-          text={`${currentHealth}/${maxHealth}`}
+    </View>
+    <View style={styles.healthTextContainer}>
+    <StrokeText
+          text={healthText}
           fontSize={responsiveFontSize(9)}
           color="#FFFFFF"
           strokeColor="#333000"
           strokeWidth={2}
-          style={styles.healthText}
+          style={[styles.healthText]}
           fontFamily='Nunito-Black'
-          align='left'
-          numberOfLines={2}
-          width={100}
+          align='center'
+          numberOfLines={1}
           />
     </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    height: '30%',
+    top: '5%',
+    zIndex: 1,
+    justifyContent: 'center',
+  },
   container: {
-    height: '18%',
+    height: '75%',
     width: '100%',
     maxWidth: 250,
     backgroundColor: '#ddd',
@@ -66,21 +76,24 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 7,
   },
-  healthText: {
+  healthTextContainer: {
     position: 'absolute',
     top: '50%',
+    minWidth: '45%',
     zIndex: 1,
-    left: '79%',
+    left: '70%',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
   },
   healthIcon: {
     position: 'absolute',
-    height: '33%',
-    width: '15%',
+    height: '130%',
+    width: '20%',
     minWidth:20,
+    minHeight: 20,
     maxHeight: 30,
     maxWidth: 30,
     zIndex: 1,
-    top: '88%',
     left: '5%',
     borderRadius: 50,
     borderWidth: 2,

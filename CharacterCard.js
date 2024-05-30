@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import HealthBar from './HealthBar';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,7 +15,7 @@ const CharacterCard = ({ character, getCharacterTypeIcon, customStyles = {}, isA
 
 
   return (
-    <View style={[defaultStyles.card, styles.card, isActive && defaultStyles.activeCard]}>
+    <LinearGradient style={[defaultStyles.card, styles.card, isActive && defaultStyles.activeCard]} colors={['#ffffff', '#9DA3AB']}>
       <View style={styles.imageContainer}>
       <Image source={character.currentImages.head} style={[defaultStyles.characterImage, styles.characterImage]} contentFit='cover'/>
       {character.level !== undefined && (
@@ -40,7 +41,7 @@ const CharacterCard = ({ character, getCharacterTypeIcon, customStyles = {}, isA
       <View style={[defaultStyles.typeIconContainer, styles.typeIconContainer]}>
         <Image source={getCharacterTypeIcon(character.type)} style={[defaultStyles.typeIcon, styles.typeIcon]} contentFit='cover'/>
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -60,12 +61,12 @@ const defaultStyles = StyleSheet.create({
   },
   healthBar: {
     position: 'absolute',
-    width: '96%',
+    width: '94%',
     maxWidth: 190,
-    top: '95%',
+    top: '90%',
   },
   imageContainer: {
-    width: '100%',
+    width: '94%',
     height: '100%',
     position: 'absolute',
     top: '0%',

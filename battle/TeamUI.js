@@ -39,7 +39,7 @@ const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
     backgroundColor: '#000',
     },
     healthBar: {
-      top: '94%',
+      top: '85%',
       width: '94%',
       maxWidth: 230,
 
