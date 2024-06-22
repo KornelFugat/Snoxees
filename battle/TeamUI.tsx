@@ -1,53 +1,57 @@
-// TeamUI.js
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ImageSourcePropType } from 'react-native';
 import CharacterCard from '../CharacterCard';
+import { Character } from '../types'; // Ensure the types are correctly imported
 
-const TeamUI = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
-  const getCharacterTypeIcon = (type) => {
-    const typeIconMap = {
-      fire: require('../assets/fireskill.png'),
-      grass: require('../assets/grassskill.png'),
-      // Add other types as necessary
-    };
+interface TeamUIProps {
+  team: Character[];
+  currentPlayerIndex: number;
+  onCharacterSwitch: (index: number) => void;
+}
 
-    return typeIconMap[type] || null;
+const getCharacterTypeIcon = (type: string): ImageSourcePropType | null => {
+  const typeIconMap: { [key: string]: ImageSourcePropType } = {
+    fire: require('../assets/fireskill.png'),
+    grass: require('../assets/grassskill.png'),
+    // Add other types as necessary
   };
 
-  const customCardStyles = {
-    card: {
-      height: '90%',
-      width: '100%',
-      margin: 0,
-    },
-    typeIconContainer:{
-      maxWidth: 53,
-    },
-    name: {
-      top: '50%',
-    },
-    levelContainer: {
-      position: 'absolute',
-      top: '58%',
-      left: '5%',
-      width: '10%',
-      height: '20%',
-      maxWidth: 20,
-      maxHeight: 20,
-      justifyContent: 'center',
+  return typeIconMap[type] || null;
+};
+
+const customCardStyles = {
+  card: {
+    height: '90%',
+    width: '100%',
+    margin: 0,
+  },
+  typeIconContainer: {
+    maxWidth: 53,
+  },
+  name: {
+    top: '50%',
+  },
+  levelContainer: {
+    position: 'absolute',
+    top: '58%',
+    left: '5%',
+    width: '10%',
+    height: '20%',
+    maxWidth: 20,
+    maxHeight: 20,
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000',
-    },
-    healthBar: {
-      top: '85%',
-      width: '94%',
-      maxWidth: 230,
+  },
+  healthBar: {
+    top: '85%',
+    width: '94%',
+    maxWidth: 230,
+  },
+  // Add other style overrides here as needed
+};
 
-    },
-
-    // Add other style overrides here as needed
-  };
-
+const TeamUI: React.FC<TeamUIProps> = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
   const renderTeamSlots = () => {
     let slots = [];
     for (let i = 0; i < 4; i++) {
@@ -102,7 +106,6 @@ const styles = StyleSheet.create({
     width: '50%',
     height: '50%',
     padding: 5,
-
   },
 });
 

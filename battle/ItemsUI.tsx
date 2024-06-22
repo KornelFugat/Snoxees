@@ -1,13 +1,13 @@
-// ItemsUI.js
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, ImageStyle, TextStyle, ViewStyle } from 'react-native';
 
-const ItemsUI = () => {
+const ItemsUI: React.FC = () => {
   return (
     <ImageBackground
       source={require('../assets/light-gradient.png')}
       resizeMode="cover"
-      style={styles.bottomPart}>
+      style={styles.bottomPart}
+    >
       <View style={styles.placeholder}>
         <Text style={styles.placeholderText}>Items Placeholder</Text>
       </View>
@@ -15,7 +15,13 @@ const ItemsUI = () => {
   );
 };
 
-const styles = StyleSheet.create({
+interface Style {
+  bottomPart: ImageStyle;
+  placeholder: ViewStyle;
+  placeholderText: TextStyle;
+}
+
+const styles = StyleSheet.create<Style>({
   bottomPart: {
     flex: 3,
     display: 'flex',
@@ -23,7 +29,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     width: '100%',
     backgroundColor: '#FFFFFF',
-    color: '#000000',
   },
   placeholder: {
     flex: 1,

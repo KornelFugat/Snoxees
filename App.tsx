@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import {GestureHandlerRootView} from'react-native-gesture-handler';
 import Battle from './battle/Battle';
-import AfterBattleScreen from './battle/AfterBattleScreen';
+import AfterBattleScreen from './afterBattle/AfterBattleScreen';
 import Screen from './Screen';
 import DraggableMap from './DraggableMap';
 import {useFonts} from 'expo-font';
@@ -11,8 +11,10 @@ import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
 
-const App = () => {
-  const [screen, setScreen] = useState('screen'); // 'home', 'battle', or 'afterBattle'
+type ScreenType = 'home' | 'battle' | 'afterBattle' | 'screen';
+
+const App: React.FC = () => {
+  const [screen, setScreen] = useState<ScreenType>('screen');
   const [fontsLoaded, fontError] = useFonts({
     'Nunito-Black': require('./assets/fonts/Nunito-Black.ttf'),
   });
@@ -46,7 +48,7 @@ const App = () => {
       case 'afterBattle':
         return <AfterBattleScreen onRestartGame={goMainScreen} />;
       default:
-        return <Screen onStartGame={startGame}/>;
+        return <Screen onStartGame={startGame} onBattleEnd={handleBattleEnd}/>;
     }
   };
 

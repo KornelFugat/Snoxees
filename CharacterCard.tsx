@@ -1,45 +1,51 @@
-// CharacterCard.js
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import HealthBar from './HealthBar';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Character } from './types';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-const responsiveFontSize = (size) => Math.round((size * width) / 375); // Assuming 375 is the base screen width
+const responsiveFontSize = (size: number) => Math.round((size * width) / 375); // Assuming 375 is the base screen width
 
-const CharacterCard = ({ character, getCharacterTypeIcon, customStyles = {}, isActive }) => {
+interface CharacterCardProps {
+  character: Character;
+  getCharacterTypeIcon: (type: string) => any;
+  customStyles?: Record<string, any>;
+  isActive?: boolean;
+}
+
+const CharacterCard: React.FC<CharacterCardProps> = ({ character, getCharacterTypeIcon, customStyles = {}, isActive = false }) => {
   const styles = { ...defaultStyles, ...customStyles };
-
 
   return (
     <LinearGradient style={[defaultStyles.card, styles.card, isActive && defaultStyles.activeCard]} colors={['#ffffff', '#9DA3AB']}>
       <View style={styles.imageContainer}>
-      <Image source={character.currentImages.head} style={[defaultStyles.characterImage, styles.characterImage]} contentFit='cover'/>
-      {character.level !== undefined && (
-        <View style={styles.levelContainer}>
-          <Text style={[defaultStyles.level, styles.level]}>{character.level}</Text>
-          
-        </View>
-      )}
+        <Image source={character.currentImages.head} style={[defaultStyles.characterImage, styles.characterImage]} contentFit='cover' />
+        {character.level !== undefined && (
+          <View style={styles.levelContainer}>
+            <Text style={[defaultStyles.level, styles.level]}>{character.level}</Text>
+          </View>
+        )}
       </View>
-      <StrokeText
+      <View style={[defaultStyles.nameContainer, styles.nameContainer]}>
+        <StrokeText
           text={character.name}
-          fontSize={responsiveFontSize(14)}
+          fontSize={responsiveFontSize(13)}
           color="#FFFFFF"
           strokeColor="#333000"
           strokeWidth={3}
-          style={[defaultStyles.name, styles.name]}
           fontFamily='Nunito-Black'
           align='left'
           numberOfLines={2}
           width={130}
-          />
+        />
+      </View>
       <HealthBar currentHealth={character.currentHealth} maxHealth={character.baseStats.maxHealth} style={[defaultStyles.healthBar, styles.healthBar]} />
       <View style={[defaultStyles.typeIconContainer, styles.typeIconContainer]}>
-        <Image source={getCharacterTypeIcon(character.type)} style={[defaultStyles.typeIcon, styles.typeIcon]} contentFit='cover'/>
+        <Image source={getCharacterTypeIcon(character.type)} style={[defaultStyles.typeIcon, styles.typeIcon]} contentFit='cover' />
       </View>
     </LinearGradient>
   );
@@ -54,7 +60,7 @@ const defaultStyles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     position: 'relative',
-    height: '40%'
+    height: '40%',
   },
   activeCard: {
     backgroundColor: '#B8FF9A', // Green background for active card
@@ -83,7 +89,6 @@ const defaultStyles = StyleSheet.create({
     position: 'absolute',
     top: '5%',
     left: '5%',
-    
   },
   levelContainer: {
     position: 'absolute',
@@ -104,8 +109,7 @@ const defaultStyles = StyleSheet.create({
     borderRadius: 10,
     fontFamily: 'Nunito-Black',
   },
-  name: {
-    fontSize: responsiveFontSize(13),
+  nameContainer: {
     top: '45%',
     left: '43%',
     position: 'absolute',

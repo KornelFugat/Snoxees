@@ -7,7 +7,12 @@ import { characters } from './charactersData';
 import DraggableMap from './DraggableMap';
 import LoadingComponent from './LoadingComponent';
 
-const Screen = ({ onStartGame }) => {
+type ScreenProps = {
+  onStartGame: () => void;
+  onBattleEnd: () => void;
+};
+
+const Screen: React.FC<ScreenProps> = ({ onStartGame, onBattleEnd }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [isTeamModalVisible, setTeamModalVisible] = useState(false);
@@ -57,6 +62,10 @@ const Screen = ({ onStartGame }) => {
     }
   };
 
+  const handleBattleEnd = () => {
+    onBattleEnd();
+  };
+
   // if (isLoading) {
   //   return <LoadingComponent duration={3000} />;
   // }
@@ -85,6 +94,9 @@ const Screen = ({ onStartGame }) => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleStartGame}>
             <Text style={styles.buttonText}>Start the Game</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleBattleEnd}>
+            <Text style={styles.buttonText}>Ending</Text>
           </TouchableOpacity>
         </View>
       </View>

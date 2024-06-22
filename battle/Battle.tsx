@@ -1,4 +1,4 @@
-// Battle.js
+// Battle.tsx
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { useBattleLogic } from './BattleLogic';
@@ -8,14 +8,20 @@ import { useMainStore } from '../stores/useMainStore';
 import { Image } from 'expo-image';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Character, Announcement, Enemy, BattleAnimationResult } from '../types';
 
 const { width, height } = Dimensions.get('window');
 
-const responsiveFontSize = (size) => Math.round((size * width) / 375);
+const responsiveFontSize = (size: number) => Math.round((size * width) / 375);
 
-const Battle = ({ onGoBack, onBattleEnd }) => {
+interface BattleProps {
+  onGoBack: () => void;
+  onBattleEnd: () => void;
+}
+
+const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
   const triggerStartAnimation = useRef(false);
-  const triggerEndAnimation = useRef(null);
+  const triggerEndAnimation = useRef<BattleAnimationResult>(null);
 
   useEffect(() => {
     console.log(4, triggerEndAnimation);
@@ -34,8 +40,8 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
   } = useBattleLogic(onBattleEnd, triggerStartAnimation, triggerEndAnimation);
 
   const { team, enemy } = useMainStore((state) => ({
-    team: state.team,
-    enemy: state.enemy,
+    team: state.team as Character[],
+    enemy: state.enemy as Enemy,
   }));
 
   return (
@@ -46,8 +52,7 @@ const Battle = ({ onGoBack, onBattleEnd }) => {
     >
       <Battleground
         currentTurn={currentTurn}
-        triggerAttack={(func) => (handleAttackRef.current = func)}
-        playerImage={team.length > 0 ? team[currentPlayerIndex].currentImages.full : 'paper.png'}
+        triggerAttack={(attackHandler: (attackName: string) => void) => (handleAttackRef.current = attackHandler)}        playerImage={team[currentPlayerIndex].currentImages.full}
         enemyImage={enemy.currentImages.full}
         currentPlayerIndex={currentPlayerIndex}
         triggerStartAnimation={triggerStartAnimation}

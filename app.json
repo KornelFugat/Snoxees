@@ -34,7 +34,7 @@
       "hidden": true
     },
     "androidNavigationBar": {
-      "visible": "immersive",
+      "visible": "sticky-immersive",
       "barStyle": "light-content",
       "backgroundColor": "#000000"
     },

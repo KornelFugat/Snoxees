@@ -1,18 +1,23 @@
-// SkillsUI.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import attacksData from '../attacks.json';
 import SkillCard from '../SkillCard';
 import { Image } from 'expo-image';
+import { Skill, Attack } from '../types'; // Ensure the types are correctly imported
 
-const SkillsUI = ({ onAttackPress, skills, disabled }) => {
+interface SkillsUIProps {
+  onAttackPress: (name: string, damage: number, type: string, multiplier: number) => void;
+  skills: Skill[];
+  disabled: boolean;
+}
+
+const SkillsUI: React.FC<SkillsUIProps> = ({ onAttackPress, skills, disabled }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
 
   const itemsPerPage = 4;
 
-
-  const iconMap = {
+  const iconMap: { [key: string]: any } = {
     normal: require('../assets/normalskill.png'),
     fire: require('../assets/fireskill.png'),
     grass: require('../assets/grassskill.png'),
@@ -32,7 +37,7 @@ const SkillsUI = ({ onAttackPress, skills, disabled }) => {
     }
   };
 
- const toggleShowDetails = () => {
+  const toggleShowDetails = () => {
     setShowDetails(!showDetails);
   };
 
@@ -45,9 +50,9 @@ const SkillsUI = ({ onAttackPress, skills, disabled }) => {
         <SkillCard
           key={index}
           skill={skill}
-          attack={attack}
+          attack={attack as Attack}
           iconMap={iconMap}
-          onPress={() => !disabled ? onAttackPress(skill.name, attack.damage, attack.type, attack.multiplier) : null}
+          onPress={() => !disabled ? onAttackPress(skill.name, attack!.damage, attack!.type, attack!.multiplier) : null}
           disabled={disabled}
           showDetails={showDetails}
         />
@@ -60,15 +65,15 @@ const SkillsUI = ({ onAttackPress, skills, disabled }) => {
       <View style={styles.skillsContainer}>
         {renderSkills()}
       </View>
-        <TouchableOpacity onPress={handlePreviousPage} disabled={currentPage === 0}>
-          <Text style={[styles.arrowLeft, currentPage === 0 && styles.disabledArrow]}>{'←'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleNextPage} disabled={currentPage >= totalPages - 1}>
-          <Text style={[styles.arrowRight, currentPage >= totalPages - 1 && styles.disabledArrow]}>{'→'}</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={handlePreviousPage} disabled={currentPage === 0}>
+        <Text style={[styles.arrowLeft, currentPage === 0 && styles.disabledArrow]}>{'←'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleNextPage} disabled={currentPage >= totalPages - 1}>
+        <Text style={[styles.arrowRight, currentPage >= totalPages - 1 && styles.disabledArrow]}>{'→'}</Text>
+      </TouchableOpacity>
       <TouchableOpacity onPress={toggleShowDetails} style={styles.detailsButton}>
-          <Image source={require('../assets/flipping-arrows.png')} contentFit='cover' style={styles.flipImage} />
-        </TouchableOpacity>
+        <Image source={require('../assets/flipping-arrows.png')} contentFit='cover' style={styles.flipImage} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -76,7 +81,7 @@ const SkillsUI = ({ onAttackPress, skills, disabled }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#333', // Dark grey background
+    backgroundColor: '#333',
     borderRadius: 10,
     padding: 10,
   },
@@ -117,14 +122,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   flipImage: {
-   width: '100%',
-   height: '100%', 
+    width: '100%',
+    height: '100%',
   },
   detailsButtonText: {
     color: '#fff',
     fontSize: 14,
   },
-
 });
 
 export default SkillsUI;

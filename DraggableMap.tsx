@@ -7,7 +7,13 @@ import { characters } from './charactersData';
 import { Image } from 'expo-image';
 import LoadingComponent from './LoadingComponent';
 
-const DraggableMap = ({ onStartGame }) => {
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+interface DraggableMapProps {
+  onStartGame: () => void;
+}
+
+const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const playerX = useSharedValue(-2325);
@@ -16,8 +22,6 @@ const DraggableMap = ({ onStartGame }) => {
   const mapY = useSharedValue(-1910);
   const mapWidth = 5000;
   const mapHeight = 5000;
-  const screenWidth = Dimensions.get('window').width;
-  const screenHeight = Dimensions.get('window').height;
 
   const images = [
     { source: require('./assets/paper.png'), x: 2600, y: 2600, width: 100, height: 100 },
@@ -38,12 +42,12 @@ const DraggableMap = ({ onStartGame }) => {
       if (isImageLoaded) {
         setIsLoading(false);
       }
-    }, 1); // 10 seconds delay
+    }, 100); // 10 seconds delay
 
     return () => clearTimeout(timer);
   }, [isImageLoaded]);
 
-  const handleMove = (dx, dy) => {
+  const handleMove = (dx: number, dy: number) => {
     let newX = playerX.value + dx * 0.1;
     let newY = playerY.value + dy * 0.1;
 

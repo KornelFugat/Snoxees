@@ -1,13 +1,19 @@
-// HealthBar.js
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, ViewStyle, TextStyle } from 'react-native';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-const responsiveFontSize = (size) => Math.round((size * width) / 375);
+const responsiveFontSize = (size: number) => Math.round((size * width) / 375);
 
-const HealthBar = ({ currentHealth, maxHealth, style }) => {
+interface HealthBarProps {
+  currentHealth: number;
+  maxHealth: number;
+  style?: ViewStyle | ViewStyle[];
+  textStyle?: TextStyle | TextStyle[];
+}
+
+const HealthBar: React.FC<HealthBarProps> = ({ currentHealth, maxHealth, style, textStyle }) => {
   const healthPercentage = (currentHealth / maxHealth) * 100;
 
   // Calculate color from green to red based on health
@@ -17,39 +23,40 @@ const HealthBar = ({ currentHealth, maxHealth, style }) => {
 
   const healthText = `${currentHealth}/${maxHealth}`;
 
-
   return (
     <View style={[styles.mainContainer, style]}>
-    <View style={[styles.healthIcon, {backgroundColor: color}]}>
-        <StrokeText
+      <View style={[styles.healthIcon, { backgroundColor: color }]}>
+        <View style={styles.healthIconTextContainer}>
+          <StrokeText
             text="+"
-            fontSize={responsiveFontSize(25)}
+            fontSize={responsiveFontSize(20)}
             color="#FFFFFF"
             strokeColor="#333000"
             strokeWidth={2}
-            style={styles.healthIconText}
             fontFamily='Nunito-Black'
             align='center'
             numberOfLines={1}
             width={100}
-            />
-      </View>
-    <View style={[styles.container]}> 
-      <View style={[styles.healthBar, { width: `${healthPercentage}%`, backgroundColor: color }]}/>   
-    </View>
-    <View style={styles.healthTextContainer}>
-    <StrokeText
-          text={healthText}
-          fontSize={responsiveFontSize(9)}
-          color="#FFFFFF"
-          strokeColor="#333000"
-          strokeWidth={2}
-          style={[styles.healthText]}
-          fontFamily='Nunito-Black'
-          align='center'
-          numberOfLines={1}
           />
-    </View>
+        </View>
+      </View>
+      <View style={[styles.container]}>
+        <View style={[styles.healthBar, { width: `${healthPercentage}%`, backgroundColor: color }]} />
+      </View>
+      <View style={[styles.healthTextContainer, textStyle]}>
+        <View style={styles.healthTextWrapper}>
+          <StrokeText
+            text={healthText}
+            fontSize={responsiveFontSize(9)}
+            color="#FFFFFF"
+            strokeColor="#333000"
+            strokeWidth={2}
+            fontFamily='Nunito-Black'
+            align='center'
+            numberOfLines={1}
+          />
+        </View>
+      </View>
     </View>
   );
 };
@@ -85,11 +92,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
   },
+  healthTextWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   healthIcon: {
     position: 'absolute',
     height: '130%',
     width: '20%',
-    minWidth:20,
+    minWidth: 20,
     minHeight: 20,
     maxHeight: 30,
     maxWidth: 30,
@@ -101,10 +112,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  healthIconTextContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   healthIconText: {
     zIndex: 1,
     fontFamily: 'Nunito-Black',
-    top: '-6%'
+    top: '-6%',
   },
 });
 

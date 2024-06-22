@@ -1,14 +1,22 @@
+// CharacterModal.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ScrollView, Button } from 'react-native';
 import { useMainStore } from '../stores/useMainStore';  // Ensure the path is correct
 import ExperienceBar from '../ExperienceBar';
+import { Character } from '../types';
 
-const CharacterModal = ({ isVisible, onClose }) => {
+interface CharacterModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+const CharacterModal: React.FC<CharacterModalProps> = ({ isVisible, onClose }) => {
   const { ownedCharacters, levelUpCharacter } = useMainStore(state => ({
-    ownedCharacters: state.ownedCharacters,
+    ownedCharacters: state.ownedCharacters as Character[],
     levelUpCharacter: state.levelUpCharacter
   }));
-  const [selectedMemberId, setSelectedMemberId] = useState(null);
+
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const selectedMember = ownedCharacters.find(member => member.id === selectedMemberId) || null;
 
   const handleLevelUp = () => {
@@ -18,10 +26,10 @@ const CharacterModal = ({ isVisible, onClose }) => {
   };
 
   const handleEvolve = () => {
-    if (selectedMember && selectedMember.level === 10 || selectedMember.level === 20) {
-        levelUpCharacter(selectedMember.id); // Assuming this handles the evolution
+    if (selectedMember && (selectedMember.level === 10 || selectedMember.level === 20)) {
+      levelUpCharacter(selectedMember.id); // Assuming this handles the evolution
     }
-};
+  };
 
   useEffect(() => {
     if (!selectedMember && ownedCharacters.length > 0) {
@@ -29,33 +37,34 @@ const CharacterModal = ({ isVisible, onClose }) => {
     }
   }, [ownedCharacters]);
 
-
   return (
     <Modal visible={isVisible} animationType="slide" onRequestClose={onClose}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>{selectedMember ? selectedMember.name : 'No Character Selected'}</Text>
-        <Image source={selectedMember ? selectedMember.currentImages.full : null} style={styles.fullImage} />
+        {selectedMember && <Image source={selectedMember.currentImages.full} style={styles.fullImage} />}
         <Text>{selectedMember ? selectedMember.level : null}</Text>
-        <ExperienceBar 
+        <ExperienceBar
+          experience={selectedMember ? selectedMember.experience : 0}
           currentExperience={selectedMember ? selectedMember.experience : 0}
-          maximumExperience={selectedMember ? selectedMember.experienceForNextLevel : 1}
+          maxExperience={selectedMember ? selectedMember.experienceForNextLevel : 1}
         />
         {selectedMember && selectedMember.experience >= selectedMember.experienceForNextLevel && (
-          <Button 
-          title="Level Up" 
-          onPress={handleLevelUp} 
-          disabled={selectedMember ? selectedMember.experience < selectedMember.experienceForNextLevel || selectedMember.level >= 30 : true} />
+          <Button
+            title="Level Up"
+            onPress={handleLevelUp}
+            disabled={selectedMember ? selectedMember.experience < selectedMember.experienceForNextLevel || selectedMember.level >= 30 : true}
+          />
         )}
         {selectedMember && (selectedMember.level === 10 || selectedMember.level === 20) && selectedMember.experience >= selectedMember.experienceForNextLevel && (
           <Button
-              title="Evolve"
-              onPress={handleEvolve}
-              disabled={selectedMember.experience < selectedMember.experienceForNextLevel}
+            title="Evolve"
+            onPress={handleEvolve}
+            disabled={selectedMember.experience < selectedMember.experienceForNextLevel}
           />
-          )}
+        )}
         <View style={styles.statsContainer}>
           <View style={styles.statsRow}>
-            <Text style={styles.stat}>Health:{selectedMember ? `${selectedMember.currentHealth} / ${selectedMember.baseStats.maxHealth}` : 'N/A'}</Text>
+            <Text style={styles.stat}>Health: {selectedMember ? `${selectedMember.currentHealth} / ${selectedMember.baseStats.maxHealth}` : 'N/A'}</Text>
             <Text style={styles.stat}>Speed: {selectedMember ? selectedMember.baseStats.speed : 'N/A'}</Text>
           </View>
           <View style={styles.statsRow}>

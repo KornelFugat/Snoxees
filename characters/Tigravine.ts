@@ -1,3 +1,5 @@
+import { Character } from "../types";
+
 const evolution1Images = {
     full: require('../assets/characters/Tigravine/1full.png'),
     portrait: require('../assets/characters/Tigravine/1gap.png'),
@@ -16,7 +18,7 @@ const evolution1Images = {
     head: require('../assets/characters/Tigravine/3head.png'),
   };
   
-  export const Tigravine = {
+  export const Tigravine: Character = {
     name: "Tigravine",
     type: "grass",
     currentHealth: 80,
@@ -29,6 +31,7 @@ const evolution1Images = {
       elementalDefence: 5
     },
     temporaryStats: {
+      maxHealth: 80,
       speed: 20,
       normalDamage: 15,
       elementalDamage: 25,
@@ -55,5 +58,9 @@ const evolution1Images = {
       { level: 11, images: evolution2Images },
       { level: 21, images: evolution3Images }
     ],
-    maxLevel: 30
+    level: 1,
+    experience: 0,
+    experienceForNextLevel: 15,
+    maxLevel: 30,
+    id: 0
   };

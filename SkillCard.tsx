@@ -1,16 +1,16 @@
-// SkillCard.js
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions, TouchableHighlight, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
 import { Image } from 'expo-image';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Attack } from 'types';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-const responsiveFontSize = (size) => Math.round((size * width) / 375);
+const responsiveFontSize = (size: number) => Math.round((size * width) / 375);
 
-const getBorderColor = (type) => {
-  switch(type) {
+const getBorderColor = (type: string) => {
+  switch (type) {
     case 'fire':
       return 'red';
     case 'normal':
@@ -24,7 +24,16 @@ const getBorderColor = (type) => {
   }
 };
 
-const SkillCard = ({ skill, attack, iconMap, onPress, disabled, showDetails }) => {
+interface SkillCardProps {
+  skill: { name: string };
+  attack: Attack;
+  iconMap: { [key: string]: ImageSourcePropType };
+  onPress: () => void;
+  disabled: boolean;
+  showDetails: boolean;
+}
+
+const SkillCard: React.FC<SkillCardProps> = ({ skill, attack, iconMap, onPress, disabled, showDetails }) => {
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled} style={styles.touchable}>
       <LinearGradient
@@ -34,16 +43,15 @@ const SkillCard = ({ skill, attack, iconMap, onPress, disabled, showDetails }) =
         {!showDetails ? (
           <>
             <View style={styles.iconContainer}>
-              <Image source={iconMap[attack.type]} style={styles.skillIcon} />
+              <Image source={iconMap[attack.type]} style={styles.skillIcon} contentFit='cover' />
             </View>
             <View style={styles.textContainer}>
               <StrokeText
                 text={skill.name.toUpperCase()}
-                fontSize={17}
+                fontSize={responsiveFontSize(17)}
                 color="#FFFFFF"
                 strokeColor="#333000"
                 strokeWidth={3}
-                style={styles.skillName}
                 fontFamily='Nunito-Black'
                 align="center"
                 numberOfLines={2}
@@ -110,11 +118,11 @@ const styles = StyleSheet.create({
     height: '130%',
     maxHeight: 100,
     maxWidth: 100,
-    contentFit: 'cover',
+    
     borderRadius: 18,
   },
   textContainer: {
-    flex: 1, // Ensures the text takes the remaining space
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -183,6 +191,9 @@ const styles = StyleSheet.create({
     top: '20%',
     fontFamily: 'Nunito-Black',
   },
+  skillName: {
+    textAlign: 'center',
+  }
 });
 
 export default SkillCard;
