@@ -6,6 +6,7 @@ import HealthBar from '../HealthBar';
 import ExperienceBar from '../ExperienceBar';
 import Animated from 'react-native-reanimated';
 import { Character } from '../types'; // Ensure the types are correctly imported
+import { BASE_URL } from 'api/accountApi';
 
 const { width } = Dimensions.get('window');
 
@@ -17,13 +18,17 @@ interface TeamCharacterCardProps {
   getCharacterTypeColor: (type: string) => string;
 }
 
+
 const TeamCharacterCard: React.FC<TeamCharacterCardProps> = ({ character, getCharacterTypeIcon, getCharacterTypeColor }) => {
+
+  const battleExperience = 0
+
   return (
     <Animated.View style={styles.container}>
       <LinearGradient style={styles.teamMemberContainer} colors={['#FFFFFF', getCharacterTypeColor(character.type)]}>
         <Text style={styles.characterName}>{character.name}</Text>
-        <Image source={character.currentImages.head} style={[styles.characterImage, { tintColor: 'gray' }]} />
-        <Image source={character.currentImages.head} style={[styles.characterImage, character.currentHealth === 0 && { opacity: 0.2 }]} />
+        <Image source={{uri: `${BASE_URL}${character.currentImages.head}`}} style={[styles.characterImage, { tintColor: 'gray' }]} />
+        <Image source={{uri: `${BASE_URL}${character.currentImages.head}`}} style={[styles.characterImage, character.currentHealth === 0 && { opacity: 0.2 }]} />
         {character.level !== undefined && (
           <View style={styles.levelContainer}>
             <Text style={styles.level}>{character.level}</Text>
@@ -31,7 +36,7 @@ const TeamCharacterCard: React.FC<TeamCharacterCardProps> = ({ character, getCha
         )}
         <View style={styles.cardContentContainer}>
           <ExperienceBar
-            experience={character.experience}
+            experience={battleExperience}
             maxExperience={character.experienceForNextLevel}
             currentExperience={character.experience}
             style={styles.experienceBar}
@@ -63,7 +68,7 @@ const styles = StyleSheet.create({
     left: '7%',
     top: '39%',
     width: '33%',
-    height: '63%',
+    height: '60%',
     maxHeight: 65,
     maxWidth: 65,
     borderRadius: 3,
@@ -79,7 +84,7 @@ const styles = StyleSheet.create({
   levelContainer: {
     position: 'absolute',
     left: '7%',
-    top: '80%',
+    top: '78%',
     width: '10%',
     height: '22%',
     maxWidth: 20,

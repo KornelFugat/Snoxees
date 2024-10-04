@@ -1,32 +1,78 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions, ImageBackground } from 'react-native';
 import Modal from 'react-native-modal';
-import Animated from 'react-native-reanimated';
-import { useMainStore } from '../stores/useMainStore';
-import HealthBar from '../HealthBar';
-import CharacterCard from '../CharacterCard';
 import { Image } from 'expo-image';
 import TeamCharacterCard from './TeamCharacterCard';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import OwnedCharacterCard from './OwnedCharacterCard';
 import { Character } from '../types'; // Ensure the types are correctly imported
+import { addToTeam, BASE_URL, fetchAccountDetails, removeCharacterFromTeam, saveTeam } from 'api/accountApi';
 
 const { width, height } = Dimensions.get('screen');
 
 const responsiveFontSize = (size: number) => Math.round((size * width) / 375);
+const responsiveHeight = (size: number) => Math.round((size * height) / 667);
 
-interface TeamModalProps {
-  isVisible: boolean;
-  onClose: () => void;
-}
 
-const TeamModal: React.FC<TeamModalProps> = ({ isVisible, onClose }) => {
-  const { team, ownedCharacters, addToTeam, removeCharacterFromTeam } = useMainStore();
+const TeamModal: React.FC = () => {
+  const [team, setTeam] = React.useState<Character[]>([]);
+  const [ownedCharacters, setOwnedCharacters] = React.useState<Character[]>([]);
 
-  const handleRemoveFromTeam = (characterId: number) => {
-    removeCharacterFromTeam(characterId);
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const result = await fetchAccountDetails();
+        setTeam(result.team);
+        setOwnedCharacters(result.ownedCharacters);
+      } catch (error) {
+        console.error('Failed to fetch team:', error);
+      }
+    };
+
+    fetch();
+  }, []);
+
+  const handleAddToTeam = async (characterId: number) => {
+    const character = ownedCharacters.find((char: Character) => char.id === characterId);
+    if (character && team.length < 4 && !team.some((char: Character) => char.id === characterId)) {
+      setTeam([...team, character]);
+    }
   };
+
+  const handleRemoveFromTeam = async (characterId: number) => {
+    setTeam(team.filter((char: Character) => char.id !== characterId));
+  };
+
+  const saveNewTeam = async (team: Character[]) => {
+    try {
+      const result = await saveTeam(team);
+      setTeam(result.team);
+    } catch (error) {
+      console.error('Failed to save team:', error);
+    }
+  };
+
+  const handleSave = async () => {
+    await saveNewTeam(team);
+  };
+
+  const isCharacterInTeam = (character: Character) => {
+    return team.some(teamMember => teamMember.id === character.id);
+  };
+
+  const sortedOwnedCharacters = ownedCharacters.sort((a, b) => {
+    const aInTeam = isCharacterInTeam(a);
+    const bInTeam = isCharacterInTeam(b);
+
+    if (aInTeam && !bInTeam) {
+      return -1;
+    } else if (!aInTeam && bInTeam) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
 
   const getCharacterTypeIcon = (type: string) => {
     const typeIconMap: { [key: string]: any } = {
@@ -48,6 +94,7 @@ const TeamModal: React.FC<TeamModalProps> = ({ isVisible, onClose }) => {
     return typeColorMap[type] || 'white';
   };
 
+
   const renderTeamSlot = (char: Character | undefined, index: number) => (
     <TouchableOpacity
       key={index}
@@ -56,23 +103,24 @@ const TeamModal: React.FC<TeamModalProps> = ({ isVisible, onClose }) => {
     >
       {char ? (
         <>
-          <Image source={char.currentImages.full} style={styles.fullCharacterImage} contentFit='cover'/>
-          <Image source={getCharacterTypeIcon(char.type)} style={styles.typeIcon} contentFit='cover'/>
+          <Image source={{ uri: `${BASE_URL}${char.currentImages.full}` }} style={styles.fullCharacterImage} contentFit='cover' />
+          <Image source={getCharacterTypeIcon(char.type)} style={styles.typeIcon} contentFit='cover' />
           <TeamCharacterCard character={char} getCharacterTypeIcon={getCharacterTypeIcon} getCharacterTypeColor={getCharacterTypeColor} />
         </>
       ) : (
-        <LinearGradient style={styles.emptySlot} colors={['#ffffff', '#9DA3AB']} start={{ x: 0.5, y: 0.5 }} />
+        <LinearGradient style={styles.emptySlot} colors={['#ffffff','silver']}  />
       )}
     </TouchableOpacity>
   );
 
   return (
-    <Modal isVisible={isVisible} onBackdropPress={onClose} style={styles.modal} deviceHeight={height} statusBarTranslucent>
-      <LinearGradient style={styles.modalContent} colors={['#E5E7E9', '#949BA4']}>
-        <View style={{ marginBottom: 20 }}>
+    <View style={styles.modal}>
+      <ImageBackground source={require('../assets/wooden-background.png')} resizeMode="cover" style={styles.modalContent}>
+        <View style={styles.content}>
+        <View style={{ marginBottom: 10 }}>
           <StrokeText
             text="MANAGE YOUR TEAM"
-            fontSize={responsiveFontSize(15)}
+            fontSize={responsiveFontSize(18)}
             color="#FFFFFF"
             strokeColor="#333000"
             strokeWidth={4}
@@ -82,31 +130,42 @@ const TeamModal: React.FC<TeamModalProps> = ({ isVisible, onClose }) => {
           />
         </View>
 
-        <LinearGradient style={styles.teamSection} colors={['#333333','#6D6D6D', '#333333','#6D6D6D']} start={{ x: 0, y: 0 }}>
+        <LinearGradient style={styles.teamSection} colors={['#FFF8E1', '#FFF8E1']} start={{ x: 0, y: 0 }}>
           <View style={styles.teamGrid}>
             {Array.from({ length: 4 }).map((_, index) => renderTeamSlot(team[index], index))}
           </View>
         </LinearGradient>
 
         <View style={styles.ownedSection}>
-          <ScrollView horizontal={false} contentContainerStyle={styles.charactersGrid}>
-            {ownedCharacters.map((char, index) => (
+          <FlatList
+            data={sortedOwnedCharacters}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                key={index}
                 style={styles.characterContainer}
-                onPress={() => addToTeam(char.id)}
+                onPress={() => handleAddToTeam(item.id)}
+                disabled={isCharacterInTeam(item)}
               >
-                <OwnedCharacterCard character={char} getCharacterTypeIcon={getCharacterTypeIcon} getCharacterTypeColor={getCharacterTypeColor} />
+                <OwnedCharacterCard
+                  character={item}
+                  getCharacterTypeIcon={getCharacterTypeIcon}
+                  getCharacterTypeColor={getCharacterTypeColor}
+                  isInTeam={isCharacterInTeam(item)}
+                  isSelected={team.some(teamMember => teamMember.id === item.id)}
+                />
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            )}
+            numColumns={3}
+            contentContainerStyle={styles.charactersGrid}
+          />
         </View>
 
-        <TouchableOpacity onPress={onClose} style={styles.button}>
-          <Text style={styles.buttonText}>Save & Close</Text>
+        <TouchableOpacity onPress={handleSave} style={styles.button}>
+          <Text style={styles.buttonText}>Save Team</Text>
         </TouchableOpacity>
-      </LinearGradient>
-    </Modal>
+        </View>
+      </ImageBackground>
+    </View>
   );
 };
 
@@ -116,30 +175,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalContent: {
-    width: width * 0.98,
-    height: height * 0.95,
+    width: width,
+    height: height,
     backgroundColor: 'white',
     padding: 22,
     justifyContent: 'center',
-    alignItems: 'center',
     borderRadius: 4,
     borderColor: 'rgba(0, 0, 0, 0.1)',
   },
+  content: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '90%',
+    top: '-7%'
+  },
   teamSection: {
-    flex: 1.5,
+    flex: 2,
     width: '100%',
     height: '50%',
     backgroundColor: '#333',
-    marginBottom: 20,
+    marginBottom: 15,
     paddingBottom: 10,
     paddingTop: 10,
     borderRadius: 10,
+    borderWidth: 4,
   },
   teamGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
-    marginBottom: 10,
     width: '100%',
     height: '50%', // Adjusted to fit two rows of larger characters
   },
@@ -148,14 +212,13 @@ const styles = StyleSheet.create({
     height: '95%', // Adjusted to fit within the container
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 11,
+    borderWidth: 3,
+    borderRadius: 15,
     margin: 5,
     backgroundColor: 'white',
   },
   fullCharacterImage: {
-    width: '50%',
+    width: '58%',
     height: '50%',
   },
   typeIcon: {
@@ -170,28 +233,25 @@ const styles = StyleSheet.create({
   emptySlot: {
     width: '100%',
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 15,
   },
   ownedSection: {
     flex: 1,
     width: '100%',
-    height: '0%',
-    backgroundColor: '#333',
+    backgroundColor: '#FFF8E1',
     borderRadius: 10,
+    borderWidth: 4,
+
   },
   charactersGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
+    flexDirection: 'column',
   },
   characterContainer: {
+    width: '30%', 
+    height: responsiveHeight(60),
     margin: 5,
-    width: '30%',
-    height: '30%',
+    left: '3%',
     alignItems: 'center',
-    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions, TouchableHighlight, ViewStyle, TextStyle, ImageSourcePropType } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions, TouchableHighlight, ImageSourcePropType } from 'react-native';
 import { Image } from 'expo-image';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -24,16 +24,21 @@ const getBorderColor = (type: string) => {
   }
 };
 
+const iconMap: { [key: string]: ImageSourcePropType } = {
+  normal: require('../assets/normalskill.png'),
+  fire: require('../assets/fireskill.png'),
+  grass: require('../assets/grassskill.png'),
+};
+
 interface SkillCardProps {
   skill: { name: string };
   attack: Attack;
-  iconMap: { [key: string]: ImageSourcePropType };
   onPress: () => void;
   disabled: boolean;
   showDetails: boolean;
 }
 
-const SkillCard: React.FC<SkillCardProps> = ({ skill, attack, iconMap, onPress, disabled, showDetails }) => {
+const SkillCard: React.FC<SkillCardProps> = ({ skill, attack, onPress, disabled, showDetails }) => {
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled} style={styles.touchable}>
       <LinearGradient
@@ -118,7 +123,6 @@ const styles = StyleSheet.create({
     height: '130%',
     maxHeight: 100,
     maxWidth: 100,
-    
     borderRadius: 18,
   },
   textContainer: {

@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, ImageSourcePropType } from 'react-native';
 import CharacterCard from '../CharacterCard';
 import { Character } from '../types'; // Ensure the types are correctly imported
 
 interface TeamUIProps {
   team: Character[];
-  currentPlayerIndex: number;
   onCharacterSwitch: (index: number) => void;
+  currentPlayerIndex: number;
 }
 
 const getCharacterTypeIcon = (type: string): ImageSourcePropType | null => {
@@ -51,7 +51,10 @@ const customCardStyles = {
   // Add other style overrides here as needed
 };
 
-const TeamUI: React.FC<TeamUIProps> = ({ team, currentPlayerIndex, onCharacterSwitch }) => {
+const TeamUI: React.FC<TeamUIProps> = ({ team, onCharacterSwitch, currentPlayerIndex }) => {
+
+  
+  
   const renderTeamSlots = () => {
     let slots = [];
     for (let i = 0; i < 4; i++) {

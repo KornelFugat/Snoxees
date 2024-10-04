@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions, TouchableHighlight } from 'react-native';
-import { useMainStore } from '../stores/useMainStore'; // Ensure this path is correct
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableHighlight, ActivityIndicator, ImageBackground } from 'react-native';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { LinearGradient } from 'expo-linear-gradient';
 import AfterBattleCard from './AfterBattleCard';
 import AfterBattleEnemyCard from './AfterBattleEnemyCard';
 import { getGradientColors, getContainerColors } from './gradients';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
-import { BattleResult } from 'types';
+import { BattleResult, Character, Enemy } from 'types';
+import { fetchAccountDetails, updateBattleExperience } from 'api/accountApi';
+import { fetchBattleDetails } from 'api/battleApi';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,6 +22,11 @@ const AfterBattleScreen: React.FC<AfterBattleScreenProps> = ({ onRestartGame }) 
   const translateY = useSharedValue(-height / 10);
   const scale = useSharedValue(4);
   const translateRewardsY = useSharedValue(height);
+  const [team, setTeam] = useState<Character[]>([]);
+  const [enemy, setEnemy] = useState<Enemy | null>(null);
+  const [battleResult, setBattleResult] = useState<BattleResult | null>(null);
+  const [battleExperience, setBattleExperience] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     scale.value = withTiming(1, { duration: 1000 });
@@ -40,19 +46,26 @@ const AfterBattleScreen: React.FC<AfterBattleScreenProps> = ({ onRestartGame }) 
     transform: [{ translateY: translateRewardsY.value }],
   }));
 
-  const { team, enemy, battleExperience, battleResult } = useMainStore(state => ({
-    team: state.team,
-    enemy: state.enemy,
-    battleExperience: state.battleExperience,
-    battleResult: state.battleResult,
-  }));
 
   useEffect(() => {
-    console.log("druzyna2", team);
-    console.log("enemy", enemy);
-    console.log("hp", team[0].baseStats.maxHealth);
-    console.log("battleExperience", battleExperience);
-  }, [team, enemy, battleExperience]);
+    const fetch = async () => {
+      try {
+        const result = await fetchBattleDetails();
+        console.log('ending screen', result)
+        setEnemy(result.enemy);
+        setBattleResult(result.result);
+        setBattleExperience(result.experienceGained);
+        setIsLoading(false);
+        const resultAccount = await fetchAccountDetails();
+        console.log('afterbattle result', resultAccount)
+        setTeam(resultAccount.team);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch battle details:', error);
+      }
+    }
+    fetch();
+  }, []);
 
   const getResultText = (result: BattleResult): string => {
     switch (result) {
@@ -67,21 +80,31 @@ const AfterBattleScreen: React.FC<AfterBattleScreenProps> = ({ onRestartGame }) 
     }
   };
 
+  //S
   const handleContinue = () => {
     onRestartGame();
     console.log('handleContinue');
   };
 
   useEffect(() => {
-    console.log(battleResult);
-  }, [battleResult]);
+    console.log(battleExperience);
+  }, [battleExperience]);
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFFFFF" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+  
   return (
-    <LinearGradient style={styles.container} colors={['#C7CED8', '#949BA4']} >
+    <ImageBackground source={require('../assets/wooden-background.png')} resizeMode="cover" style={styles.container}>
       <View style={styles.header}>
         <StrokeText
           text="BATTLE RESULTS"
-          fontSize={responsiveFontSize(15)}
+          fontSize={responsiveFontSize(20)}
           color="#FFFFFF"
           strokeColor="#333000"
           strokeWidth={4}
@@ -151,7 +174,7 @@ const AfterBattleScreen: React.FC<AfterBattleScreenProps> = ({ onRestartGame }) 
         </TouchableHighlight>
       </View>
       {/* <Text style={styles.restartButton} onPress={onRestartGame}>Restart Battle</Text> */}
-    </LinearGradient>
+    </ImageBackground>
   );
 };
 
@@ -161,10 +184,23 @@ const styles = StyleSheet.create({
     padding: 10,
     borderColor: '#A9B2BC',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0D0208', // Dark background
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#FFFFFF',
+    fontSize: responsiveFontSize(18),
+    textAlign: 'center',
+    fontFamily: 'Nunito-Black',
+  },
   header: {
     position: 'absolute',
     top: '2%',
-    left: '34%',
+    left: '28%',
   },
   contentContainer: {
     top: '12%',

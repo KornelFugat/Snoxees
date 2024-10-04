@@ -2,40 +2,26 @@
 import React, { useEffect } from "react";
 import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { StyleSheet } from 'react-native';
-import attacksData from '../../attacks.json';
-import { useMainStore } from "../../stores/useMainStore";
-import { Character } from '../../types';
-import { ImageSourcePropType } from 'react-native';
+
 
 interface PunchProps {
-  playerTurn: boolean;
   isPunchActive: boolean;
   setIsPunchActive: (active: boolean) => void;
-  triggerEnemyEffect: (repeats: number, damage: number) => void;
-  triggerPlayerEffect: (repeats: number, damage: number) => void;
-  playerImage: ImageSourcePropType;
-  enemyImage: ImageSourcePropType;
-  currentPlayerIndex: number;
+  triggerEnemyEffect: (repeats: number, damage: (number | 'miss' | '')[]) => void;
+  triggerPlayerEffect: (repeats: number, damage: (number | 'miss' | '')[]) => void;
+  playerImage: string;
+  enemyImage: string;
+  damageResults: (number | 'miss' | '')[];
+  currentTurn: 'start' | 'player' | 'enemy' | 'end';
+  isEnemyAsleep: boolean;
+  isPlayerAsleep: boolean;
 }
 
-const Punch: React.FC<PunchProps> = ({ playerTurn, isPunchActive, setIsPunchActive, triggerEnemyEffect, triggerPlayerEffect, playerImage, enemyImage, currentPlayerIndex }) => {
+const Punch: React.FC<PunchProps> = ({ isPunchActive, setIsPunchActive, triggerEnemyEffect, triggerPlayerEffect, playerImage, enemyImage, damageResults, currentTurn, isEnemyAsleep, isPlayerAsleep }) => {
   const translateXPlayer = useSharedValue(0);
   const translateXEnemy = useSharedValue(0);
   const zIndexPlayer = useSharedValue(0);
   const zIndexEnemy = useSharedValue(0);
-
-  const attack = attacksData.find(a => a.name === "Punch");
-
-  const { team, enemy } = useMainStore(state => ({
-    team: state.team as Character[],
-    enemy: state.enemy as Character
-  }));
-
-  const calculateDamage = (baseDamage: number, attackType: string, characterStats: any, multiplier: number) => {
-    return attackType === 'normal'
-      ? baseDamage * characterStats.normalDamage * multiplier
-      : baseDamage * characterStats.elementalDamage * multiplier;
-  };
 
   const punchPlayerAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -50,40 +36,44 @@ const Punch: React.FC<PunchProps> = ({ playerTurn, isPunchActive, setIsPunchActi
       zIndex: zIndexEnemy.value,
     };
   });
-
+//S
   const triggerPunchPlayer = () => {
     zIndexPlayer.value = 1;
-    const actualDamage = calculateDamage(attack!.damage, attack!.type, team[currentPlayerIndex].temporaryStats, attack!.multiplier);
-    console.log(attack, actualDamage, team[currentPlayerIndex].temporaryStats);
     translateXPlayer.value = withSequence(
       withTiming(200, { duration: 400, easing: Easing.back(3) }),
       withTiming(0, { duration: 600, easing: Easing.cubic }, () => {
         zIndexPlayer.value = 0;
-        runOnJS(triggerEnemyEffect)(2, actualDamage);
-        runOnJS(setIsPunchActive)(false);
+        runOnJS(applyDamageEffects)();
       }),
     );
   };
-
+//S
   const triggerPunchEnemy = () => {
     zIndexEnemy.value = 1;
-    const actualDamage = calculateDamage(attack!.damage, attack!.type, enemy.temporaryStats, attack!.multiplier);
-    translateXEnemy.value = withSequence(
-      withTiming(-200, { duration: 400, easing: Easing.back(3) }),
-      withTiming(0, { duration: 600, easing: Easing.cubic }, () => {
-        zIndexEnemy.value = 0;
-        runOnJS(triggerPlayerEffect)(2, actualDamage);
-        runOnJS(setIsPunchActive)(false);
-      }),
-    );
+      translateXEnemy.value = withSequence(
+        withTiming(-200, { duration: 400, easing: Easing.back(3) }),
+        withTiming(0, { duration: 600, easing: Easing.cubic }, () => {
+          zIndexEnemy.value = 0;
+          runOnJS(applyDamageEffects)();
+        }),
+      );    
   };
 
+  const applyDamageEffects = async () => {
+        if (currentTurn === 'player') {
+          triggerEnemyEffect(damageResults.length, damageResults);
+        } else {
+          triggerPlayerEffect(damageResults.length, damageResults);
+        }
+    runOnJS(setIsPunchActive)(false);
+  };
+//S
   useEffect(() => {
     if (isPunchActive) {
-      if (playerTurn) {
+      if (currentTurn === 'player' && !isPlayerAsleep) {
         triggerPunchPlayer();
       }
-      if (!playerTurn) {
+      if (currentTurn === 'enemy' && !isEnemyAsleep) {
         triggerPunchEnemy();
       }
     }
@@ -92,11 +82,11 @@ const Punch: React.FC<PunchProps> = ({ playerTurn, isPunchActive, setIsPunchActi
   return (
     <>
       <Animated.Image
-        source={playerImage}
+        source={{uri: playerImage}}
         style={[styles.attacker, punchPlayerAnimatedStyle]}
       />
       <Animated.Image
-        source={enemyImage}
+        source={{uri: enemyImage}}
         style={[styles.enemy, punchEnemyAnimatedStyle]} // The original enemy image
       />
     </>

@@ -1,41 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Dimensions, TouchableOpacity, Alert, InteractionManager } from 'react-native';
 import Joystick from './Joystick';
-import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
-import { useMainStore } from './stores/useMainStore';
-import { characters } from './charactersData';
+import Animated, { useSharedValue, useAnimatedStyle, runOnUI } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import LoadingComponent from './LoadingComponent';
+import { checkBattleRequirements } from 'api/battleApi';
+import { Character } from 'types';
+import { fetchAccountDetails } from 'api/accountApi';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
 interface DraggableMapProps {
+  team: Character[];
   onStartGame: () => void;
 }
 
-const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame }) => {
+const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame, team }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const playerX = useSharedValue(-2325);
-  const playerY = useSharedValue(1910);
-  const mapX = useSharedValue(2200);
-  const mapY = useSharedValue(-1910);
-  const mapWidth = 5000;
-  const mapHeight = 5000;
-
+  const mapWidth = 1250;
+  const mapHeight = 1250;
+  const playerX = useSharedValue(-260);
+  const playerY = useSharedValue(33);
+  const mapX = useSharedValue(260);
+  const mapY = useSharedValue(-33);
   const images = [
-    { source: require('./assets/paper.png'), x: 2600, y: 2600, width: 100, height: 100 },
-    { source: require('./assets/spruceTree.png'), x: 500, y: 4300, width: 100, height: 200 },
+    // { source: require('./assets/paper.png'), x: 2600, y: 2600, width: 100, height: 100 },
+    // { source: require('./assets/spruceTree.png'), x: 500, y: 4300, width: 100, height: 200 },
     { source: require('./assets/spruceTree.png'), x: 500, y: 600, width: 100, height: 200 },
-    { source: require('./assets/spruceTree.png'), x: 4300, y: 4300, width: 100, height: 200 },
-    { source: require('./assets/spruceTree.png'), x: 4300, y: 500, width: 100, height: 200 },
+    // { source: require('./assets/spruceTree.png'), x: 4300, y: 4300, width: 100, height: 200 },
+    // { source: require('./assets/spruceTree.png'), x: 4300, y: 500, width: 100, height: 200 },
     // Add more images here
   ];
-
-  const { team, setEnemy } = useMainStore((state) => ({
-    team: state.team,
-    setEnemy: state.setEnemy,
-  }));
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -47,10 +43,15 @@ const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame }) => {
     return () => clearTimeout(timer);
   }, [isImageLoaded]);
 
+  const maxX = useRef(mapWidth / 2 - 175).current;
+  const maxYup = useRef(mapHeight / 2 - 100).current;
+  const maxYdown = useRef(mapHeight / 2 - 100).current;
+  
   const handleMove = (dx: number, dy: number) => {
-    let newX = playerX.value + dx * 0.1;
-    let newY = playerY.value + dy * 0.1;
-
+    runOnUI(() => {
+    let newX = playerX.value + dx * 0.03;
+    let newY = playerY.value + dy * 0.03;
+  
     // Check for collision with images
     for (const img of images) {
       if (
@@ -62,17 +63,13 @@ const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame }) => {
         return;
       }
     }
-
-    // Prevent the player from moving off the map
-    const maxX = mapWidth / 2 - 175;
-    const maxYup = mapHeight / 2 - 400;
-    const maxYdown = mapHeight / 2 - 100;
-
+  
+    // Use pre-calculated maxX, maxYup, maxYdown
     if (newX > maxX) newX = maxX;
     if (newX < -maxX) newX = -maxX;
     if (newY > maxYdown) newY = maxYdown;
     if (newY < -maxYup) newY = -maxYup;
-
+  
     playerX.value = newX;
     playerY.value = newY;
 
@@ -92,6 +89,7 @@ const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame }) => {
     } else {
       mapY.value = -newY;
     }
+  })();
   };
 
   const playerStyle = useAnimatedStyle(() => ({
@@ -102,18 +100,17 @@ const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame }) => {
     transform: [{ translateX: mapX.value }, { translateY: mapY.value }],
   }));
 
-  const handleSetEnemy = () => {
-    const allCharacters = Object.values(characters); // Ensure characters is an object where keys are character names
-    const randomEnemy = allCharacters[Math.floor(Math.random() * allCharacters.length)];
-    setEnemy({ ...randomEnemy, currentHealth: randomEnemy.baseStats.maxHealth });
-  };
-
   const handleStartGame = () => {
+    console.log('click', Date.now())
     if (team.length === 0) {
       Alert.alert('No Team', 'Please add at least one character to your team before starting the game.');
     } else {
-      handleSetEnemy();
-      onStartGame();
+      checkBattleRequirements();
+      setTimeout(() => {
+        console.log('handleStartGame', Date.now());
+        onStartGame();
+      }, 2000);
+      
     }
   };
 
@@ -122,7 +119,7 @@ const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame }) => {
       {isLoading && <LoadingComponent duration={1} />}
       <Animated.View style={[styles.map, mapStyle]}>
         <Image
-          source={require('./assets/mapa5000x5000test.png')}
+          source={require('./assets/mapa1250x1250.png')}
           style={styles.mapStyle}
           contentFit="cover"
           onLoad={() => setIsImageLoaded(true)}
@@ -148,8 +145,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   map: {
-    width: 5000,
-    height: 5000,
+    width: 1250,
+    height: 1250,
     position: 'absolute',
   },
   mapStyle: {

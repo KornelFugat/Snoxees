@@ -8,7 +8,7 @@ const { width } = Dimensions.get('window');
 const responsiveFontSize = (size: number) => Math.round((size * width) / 375);
 
 interface ExperienceBarProps {
-  experience: number;
+  experience?: number;
   maxExperience: number;
   currentExperience: number;
   style?: ViewStyle | ViewStyle[];
@@ -17,8 +17,8 @@ interface ExperienceBarProps {
 }
 
 const ExperienceBar: React.FC<ExperienceBarProps> = ({ experience, maxExperience, currentExperience, style, textStyle, textFont }) => {
-  const experiencePercentage = (currentExperience / maxExperience) * 100;
-  const additionalExperiencePercentage = experience ? ((currentExperience - experience) / maxExperience) * 100 : 0;
+  const experiencePercentage = experience ? ((currentExperience-experience) / maxExperience) * 100 : (currentExperience / maxExperience) * 100;
+  const additionalExperiencePercentage = experience ? ((currentExperience) / maxExperience) * 100 : 0;
 
   const currentExperienceColors = ['#448EE7', '#ADD8E6']; // Light blue
   const additionalExperienceColors = ['#448EE7', '#0000FF']; // Blue
@@ -53,8 +53,8 @@ const ExperienceBar: React.FC<ExperienceBarProps> = ({ experience, maxExperience
           )}  
           {additionalExperiencePercentage !==0 && (
             <>
-            <LinearGradient style={[styles.experienceBar, { width: `${experiencePercentage}%` }]} colors={currentExperienceColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}/>
-            <LinearGradient style={[styles.additionalExperienceBar, { width: `${additionalExperiencePercentage}%` }]} colors={additionalExperienceColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
+            <LinearGradient style={[styles.experienceBar, { width: `${experiencePercentage}%` }]} colors={additionalExperienceColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}/>
+            <LinearGradient style={[styles.additionalExperienceBar, { width: `${additionalExperiencePercentage}%` }]} colors={currentExperienceColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
             </>
           )} 
             
@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 7,
     position: 'absolute',
+    zIndex: 1,
   },
   additionalExperienceBar: {
     height: '100%',

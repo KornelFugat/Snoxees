@@ -1,4 +1,5 @@
-import { ImageSourcePropType } from "react-native";
+
+export type ScreenType = 'home' | 'team' | 'characters' | 'battle' | 'afterBattle' | 'screen' | 'town' | 'snoexes';
 
 export interface BaseStats {
     maxHealth: number;
@@ -26,6 +27,50 @@ export interface BaseStats {
       head: string;
     };
   }
+
+  export interface BattleStore {
+    isInitialized: boolean;
+    enemy: Enemy | null;
+    currentTurn: 'start' | 'player' | 'enemy' | 'end';
+    currentAnnouncement: Announcement[];
+    isUIEnabled: boolean;
+    currentPlayerIndex: number;
+    chosenAttack: string | null;
+    damageResults: (number | 'miss')[];
+    changedPlayerStats: { stat: string, newValue: number }[];
+    changedEnemyStats: { stat: string, newValue: number }[];
+    isSwitching: boolean;
+    captureChance: number;
+    baseCaptureChance: number;
+    captureChanceModifier: number;
+    turnCounter: number;
+    result: BattleResult | null;
+    experienceGained: number;
+    isPlayerAsleep: boolean;
+    isEnemyAsleep: boolean;
+    playerDamageOverTime: number;
+    enemyDamageOverTime: number;
+    playerDamageOverTimeDuration: number;
+    enemyDamageOverTimeDuration: number;
+    setIsInitialized: (isInitialized: boolean) => void;
+    setEnemy: (enemy: Enemy | null) => void;
+    setCurrentAnnouncement: (announcement: Announcement[] | null) => void;
+    setIsUIEnabled: (enabled: boolean) => void;
+    updateEnemyHealth: (newHealth: number) => void;
+    setCurrentTurn: (turn: 'player' | 'enemy' | 'end') => void;
+    setCurrentPlayerIndex: (index: number) => void;
+    setChosenAttack: (attack: string | null) => void;
+    setIsSwitching: (isSwitching: boolean) => void;
+    setCaptureChance: (chance: number) => void;
+    setCaptureChanceModifier: (modifier: number) => void;
+    setTurnCounter: (counter: number) => void;
+    setIsPlayerAsleep: (isAsleep: boolean) => void;
+    setIsEnemyAsleep: (isAsleep: boolean) => void;
+    setPlayerDamageOverTime: (damageOverTime: number) => void;
+    setEnemyDamageOverTime: (damageOverTime: number) => void;
+    setPlayerDamageOverTimeDuration: (duration: number) => void;
+    setEnemyDamageOverTimeDuration: (duration: number) => void;
+  }
   
   export interface Skill {
     level: number;
@@ -33,17 +78,28 @@ export interface BaseStats {
   }
 
   export interface Attack {
+    name: string;
+    class: string[];
     type: string;
     damage: number;
+    multiplier: number;
     accuracy: number;
-    name: string;
+    ticks: number;
+    damageOverTime: boolean;
+    damageOverTimeDuration?: number;
+    sleep: boolean;
+    buff?: {stat: string, value: number};
+    debuff?: {stat: string, value: number};
+    upgrade?: string;
+    upgradeDescription?: string;
+    description: string;
   }
 
   export interface Announcement {
     text: string;
-    timestamp: number;
     displayTime: number;
   }
+
   
   export interface Character {
     name: string;
@@ -57,44 +113,43 @@ export interface BaseStats {
     experience: number;
     experienceForNextLevel: number;
     currentImages: {
-      full: ImageSourcePropType;
-      portrait: ImageSourcePropType;
-      head: ImageSourcePropType;
+      full: string;
+      portrait: string;
+      head: string;
     };
     temporaryStats: BaseStats;
+    trainingCost: number;
+    evolveCost: number;
     maxLevel: number;
     id: number;
   }
   
   export interface Enemy extends Character {}
 
+  export type CurrentTurn = 'start' | 'player' | 'enemy' | 'end';
   export type BattleResult = 'victory' | 'defeat' | 'captured' | 'default' | null;
   export type BattleAnimationResult = 'enemyDefeated' | 'playerDefeated' | 'lastPlayerDefeated' | 'captureSuccess' | 'captureFailure' | null;
   export interface AccountStore {
     playerName: string;
     team: Character[];
     ownedCharacters: Character[];
-    enemy: Enemy | null;
     gold: number;
     diamonds: number;
     nextCharacterId: number;
-    battleExperience: number;
-    battleResult: BattleResult;
+    fetchAccountDetails: () => void;
     updatePlayerName: (name: string) => void;
     updateGold: (amount: number) => void;
     updateDiamonds: (amount: number) => void;
-    updateBattleExperience: (amount: number) => void;
-    updateBattleResult: (result: string) => void;
     addCharacterToOwned: (characterName: string) => void;
     addToTeam: (characterId: number) => void;
     removeCharacterFromTeam: (characterId: number) => void;
-    updateTeam: (newTeam: Character[]) => void;
     removeCharacterFromOwned: (characterId: number) => void;
-    setEnemy: (enemy: Enemy) => void;
-    updateEnemyHealth: (newHealth: number) => void;
+    // setEnemy: (enemy: Enemy) => void;
+    // updateEnemyHealth: (newHealth: number) => void;
     updateHealth: (characterId: number, health: number) => void;
     resetCurrentHealth: () => void;
     addExperienceToTeam: (experience: number) => void;
     levelUpCharacter: (characterId: number) => void;
+    evolveCharacter: (characterId: number) => void;
   }
   

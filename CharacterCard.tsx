@@ -5,6 +5,7 @@ import HealthBar from './HealthBar';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Character } from './types';
+import { BASE_URL } from 'api/accountApi';
 
 const { width } = Dimensions.get('window');
 
@@ -20,10 +21,14 @@ interface CharacterCardProps {
 const CharacterCard: React.FC<CharacterCardProps> = ({ character, getCharacterTypeIcon, customStyles = {}, isActive = false }) => {
   const styles = { ...defaultStyles, ...customStyles };
 
+
   return (
     <LinearGradient style={[defaultStyles.card, styles.card, isActive && defaultStyles.activeCard]} colors={['#ffffff', '#9DA3AB']}>
       <View style={styles.imageContainer}>
-        <Image source={character.currentImages.head} style={[defaultStyles.characterImage, styles.characterImage]} contentFit='cover' />
+        <Image 
+          source={{uri: `${BASE_URL}${character.currentImages.head}`}} 
+          style={[defaultStyles.characterImage, styles.characterImage]} 
+          contentFit='cover' />
         {character.level !== undefined && (
           <View style={styles.levelContainer}>
             <Text style={[defaultStyles.level, styles.level]}>{character.level}</Text>

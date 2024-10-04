@@ -1,63 +1,111 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useMainStore } from './stores/useMainStore';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Dimensions } from 'react-native';
 import TeamModal from './modals/TeamModal';
 import CharacterModal from './modals/CharacterModal';
 import { characters } from './charactersData';
 import DraggableMap from './DraggableMap';
 import LoadingComponent from './LoadingComponent';
+import { checkBattleRequirements } from 'api/battleApi';
+import { Character } from 'types';
+import { addCharacterToOwned, fetchAccountDetails, resetCurrentHealth } from 'api/accountApi';
+
+const { width, height } = Dimensions.get('window');
+
+const responsiveFontSize = (size: number) => Math.round((size * width) / 375);
 
 type ScreenProps = {
   onStartGame: () => void;
+  onTeamUI: () => void;
+  onCharactersUI: () => void;
   onBattleEnd: () => void;
 };
 
-const Screen: React.FC<ScreenProps> = ({ onStartGame, onBattleEnd }) => {
+const Screen: React.FC<ScreenProps> = ({ onStartGame, onBattleEnd, onTeamUI, onCharactersUI }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
-  const [isTeamModalVisible, setTeamModalVisible] = useState(false);
-  const [isCharacterModalVisible, setCharacterModalVisible] = useState(false);
+  const [team, setTeam] = React.useState<Character[]>([]);
+  const [ownedCharacters, setOwnedCharacters] = React.useState<Character[]>([]);
 
-  const { playerName, team, updatePlayerName, ownedCharacters, enemy, addCharacterToOwned, setEnemy, resetCurrentHealth } = useMainStore();
-
-  useEffect(() => {
-    console.log("HOME", team);
-
-    const minimumLoadingTime = 3000; // 10 seconds delay
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, minimumLoadingTime);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
-    if (isReady) {
-      setIsLoading(false);
+    const fetchAccount = async () => {
+      try {
+        const result = await fetchAccountDetails();
+        setOwnedCharacters(result.ownedCharacters);
+        setTeam(result.team);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch account:', error);
+      }
     }
-  }, [isReady]);
+    fetchAccount();
+  }, [])
+  // useEffect(() => {
+  //   const minimumLoadingTime = 3000; 
+  //   const timer = setTimeout(() => {
+  //     setIsReady(true);
+  //   }, minimumLoadingTime);
 
-  const addCharactersG = () => {
-    addCharacterToOwned('Glimmbear');
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+  // useEffect(() => {
+  //   if (isReady) {
+  //     setIsLoading(false);
+  //   }
+  // }, [isReady]);
+
+
+  const addCharactersG = async () => {
+    try{
+      addCharacterToOwned('Glimmbear');
+      const result = await fetchAccountDetails();
+      setOwnedCharacters(result.ownedCharacters);
+    } catch (error) {
+      console.error('Failed to add character:', error);
+    }
   };
-  const addCharactersT = () => {
-    addCharacterToOwned('Tigravine');
+  const addCharactersT = async () => {
+    try{
+      addCharacterToOwned('Tigravine');
+      const result = await fetchAccountDetails();
+        setOwnedCharacters(result.ownedCharacters);
+    } catch (error) {
+      console.error('Failed to add character:', error);
+    }
   };
-  const addCharactersF = () => {
-    addCharacterToOwned('Fruigle');
+  const addCharactersF = async () => {
+    try{
+      addCharacterToOwned('Fruigle');
+      const result = await fetchAccountDetails();
+        setOwnedCharacters(result.ownedCharacters);
+    } catch (error) {
+      console.error('Failed to add character:', error);
+    }
   };
 
-  const handleSetEnemy = () => {
-    const allCharacters = Object.values(characters); // Ensure characters is an object where keys are character names
-    const randomEnemy = allCharacters[Math.floor(Math.random() * allCharacters.length)];
-    setEnemy({ ...randomEnemy, currentHealth: randomEnemy.baseStats.maxHealth });
-  };
+  const resetCharactersHealth = async () => {
+    try{
+      const result = await resetCurrentHealth();
+      setOwnedCharacters(result.ownedCharacters);
+    } catch (error) {
+      console.error('Failed to reset characters health:', error);
+    }
+  }
+
+  const handleOpenTeamModal = () => {
+    onTeamUI()
+  }
+
+  const handleOpenCharactersModal = () => {
+    onCharactersUI()
+  }
 
   const handleStartGame = () => {
     if (team.length === 0) {
       Alert.alert('No Team', 'Please add at least one character to your team before starting the game.');
     } else {
-      handleSetEnemy();
+      checkBattleRequirements();
       onStartGame();
     }
   };
@@ -66,20 +114,20 @@ const Screen: React.FC<ScreenProps> = ({ onStartGame, onBattleEnd }) => {
     onBattleEnd();
   };
 
-  // if (isLoading) {
-  //   return <LoadingComponent duration={3000} />;
-  // }
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFFFFF" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
 
   return (
     <View style={styles.container}>
       <View style={styles.absoluteButtonContainer}>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={() => setTeamModalVisible(true)} style={styles.button}>
-            <Text style={styles.buttonText}>TEAM</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setCharacterModalVisible(true)} style={styles.button}>
-            <Text style={styles.buttonText}>CHARACTERS</Text>
-          </TouchableOpacity>
           <TouchableOpacity onPress={addCharactersT} style={styles.button}>
             <Text style={styles.buttonText}>ADD TIGRAVINE</Text>
           </TouchableOpacity>
@@ -89,7 +137,7 @@ const Screen: React.FC<ScreenProps> = ({ onStartGame, onBattleEnd }) => {
           <TouchableOpacity onPress={addCharactersF} style={styles.button}>
             <Text style={styles.buttonText}>ADD FRUIGLE</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={resetCurrentHealth}>
+          <TouchableOpacity style={styles.button} onPress={resetCharactersHealth}>
             <Text style={styles.buttonText}>Reset HP</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleStartGame}>
@@ -100,9 +148,7 @@ const Screen: React.FC<ScreenProps> = ({ onStartGame, onBattleEnd }) => {
           </TouchableOpacity>
         </View>
       </View>
-      <TeamModal isVisible={isTeamModalVisible} onClose={() => setTeamModalVisible(false)} />
-      <CharacterModal isVisible={isCharacterModalVisible} onClose={() => setCharacterModalVisible(false)} />
-      <DraggableMap onStartGame={handleStartGame} />
+      <DraggableMap onStartGame={handleStartGame} team={team}/>
     </View>
   );
 };
@@ -114,6 +160,19 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#0D0208',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0D0208', // Dark background
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#FFFFFF',
+    fontSize: responsiveFontSize(18),
+    textAlign: 'center',
+    fontFamily: 'Nunito-Black',
   },
   absoluteButtonContainer: {
     position: 'absolute',

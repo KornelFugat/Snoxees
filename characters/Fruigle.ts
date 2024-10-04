@@ -1,21 +1,21 @@
 import { Character } from '../types';
 
 const evolution1Images = {
-    full: require('../assets/characters/Fruigle/1full.png'),
-    portrait: require('../assets/characters/Fruigle/1gap.png'),
-    head: require('../assets/characters/Fruigle/1head.png'),
+    full: 'assets/characters/Fruigle/1full.png',
+    portrait: 'assets/characters/Fruigle/1gap.png',
+    head: 'assets/characters/Fruigle/1head.png',
   };
   
   const evolution2Images = {
-    full: require('../assets/characters/Fruigle/2full.png'),
-    portrait: require('../assets/characters/Fruigle/2gap.png'),
-    head: require('../assets/characters/Fruigle/2head.png'),
+    full: 'assets/characters/Fruigle/2full.png',
+    portrait: 'assets/characters/Fruigle/2gap.png',
+    head: 'assets/characters/Fruigle/2head.png',
   };
   
   const evolution3Images = {
-    full: require('../assets/characters/Fruigle/3full.png'),
-    portrait: require('../assets/characters/Fruigle/3gap.png'),
-    head: require('../assets/characters/Fruigle/3head.png'),
+    full: 'assets/characters/Fruigle/3full.png',
+    portrait: 'assets/characters/Fruigle/3gap.png',
+    head: 'assets/characters/Fruigle/3head.png',
   };
   
   export const Fruigle: Character = {

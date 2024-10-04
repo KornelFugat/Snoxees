@@ -1,21 +1,21 @@
 import { Character } from '../types';
 
 const evolution1Images = {
-  full: require('../assets/characters/Glimmbear/1full.png'),
-  portrait: require('../assets/characters/Glimmbear/1gap.png'),
-  head: require('../assets/characters/Glimmbear/1head.png'),
+  full: 'assets/characters/Glimmbear/1full.png',
+  portrait: 'assets/characters/Glimmbear/1gap.png',
+  head: 'assets/characters/Glimmbear/1head.png',
 };
 
 const evolution2Images = {
-  full: require('../assets/characters/Glimmbear/2full.png'),
-  portrait: require('../assets/characters/Glimmbear/2gap.png'),
-  head: require('../assets/characters/Glimmbear/2head.png'),
+  full: 'assets/characters/Glimmbear/2full.png',
+  portrait: 'assets/characters/Glimmbear/2gap.png',
+  head: 'assets/characters/Glimmbear/2head.png',
 };
 
 const evolution3Images = {
-  full: require('../assets/characters/Glimmbear/3full.png'),
-  portrait: require('../assets/characters/Glimmbear/3gap.png'),
-  head: require('../assets/characters/Glimmbear/3head.png'),
+  full: 'assets/characters/Glimmbear/3full.png',
+  portrait: 'assets/characters/Glimmbear/3gap.png',
+  head: 'assets/characters/Glimmbear/3head.png',
 };
 
 export const Glimmbear: Character = {

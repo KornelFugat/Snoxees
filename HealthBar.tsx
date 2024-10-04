@@ -32,7 +32,7 @@ const HealthBar: React.FC<HealthBarProps> = ({ currentHealth, maxHealth, style, 
             fontSize={responsiveFontSize(20)}
             color="#FFFFFF"
             strokeColor="#333000"
-            strokeWidth={2}
+            strokeWidth={3}
             fontFamily='Nunito-Black'
             align='center'
             numberOfLines={1}
@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
   },
   healthIcon: {
     position: 'absolute',
-    height: '130%',
-    width: '20%',
+    height: '100%',
+    width: '15%',
     minWidth: 20,
     minHeight: 20,
     maxHeight: 30,
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
   healthIconTextContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    top: '-5%',
   },
   healthIconText: {
     zIndex: 1,

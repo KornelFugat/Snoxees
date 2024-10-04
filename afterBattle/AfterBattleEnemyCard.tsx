@@ -6,6 +6,7 @@ import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { Image } from 'expo-image';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
 import { Enemy, BattleResult } from 'types';
+import { BASE_URL } from 'api/accountApi';
 
 const { width, height } = Dimensions.get('window');
 
@@ -60,11 +61,12 @@ const AfterBattleEnemyCard: React.FC<AfterBattleEnemyCardProps> = ({ enemy, batt
     return null;
   }
 
+
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
       <LinearGradient style={styles.cardContainer} colors={['#FFFFFF', '#9DA3AB']}>
-        <Image source={enemy.currentImages.head} style={[styles.enemyImage, { tintColor: 'red' }]} />
-        <Image source={enemy.currentImages.head} style={[styles.enemyImage, enemy.currentHealth === 0 && { opacity: 0.5 }]} />
+        <Image source={{uri: `${BASE_URL}${enemy.currentImages.head}`}} style={[styles.enemyImage, { tintColor: 'red' }]} />
+        <Image source={{uri: `${BASE_URL}${enemy.currentImages.head}`}} style={[styles.enemyImage, enemy.currentHealth === 0 && { opacity: 0.5 }]} />
         <View style={styles.cardContentContainerReversed}>
           <Text style={styles.characterName}>{enemy.name}</Text>
           {battleResult !== 'captured' && (

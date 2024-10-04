@@ -10,29 +10,31 @@ const { width } = Dimensions.get('window');
 const responsiveFontSize = (size: number) => Math.round((size * width) / 375);
 
 interface BattleUIProps {
-  onAttackPress: (name: string, damage: number, type: string, multiplier: number) => void;
+  onAttackPress: (attackName: string) => void;
   skills: Skill[];
   team: Character[];
-  currentPlayerIndex: number;
   onCharacterSwitch: (index: number) => void;
   disabled: boolean;
   captureChance: number;
   handleCatchEnemy: () => void;
   announcement: string;
+  currentPlayerIndex: number;
 }
 
 const BattleUI: React.FC<BattleUIProps> = ({
   onAttackPress,
   skills,
   team,
-  currentPlayerIndex,
   onCharacterSwitch,
+  currentPlayerIndex,
   disabled,
   captureChance,
   handleCatchEnemy,
   announcement
 }) => {
   const [activeTab, setActiveTab] = useState('skills');
+
+  
 
   const getAnnouncementFontSize = (text: string) => {
     return text.length > 23 ? responsiveFontSize(8) : responsiveFontSize(9);

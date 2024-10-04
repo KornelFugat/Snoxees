@@ -6,6 +6,7 @@ import HealthBar from "../HealthBar";
 import ExperienceBar from "../ExperienceBar";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { Character } from "types";
+import { BASE_URL } from "api/accountApi";
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,11 +31,12 @@ const AfterBattleCard: React.FC<AfterBattleCardProps> = ({ index, member, battle
     transform: [{ translateY: translateY.value }],
   }));
 
+
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
       <LinearGradient key={index} style={styles.teamMemberContainer} colors={['#FFFFFF', '#9DA3AB']}>
-        <Image source={member.currentImages.head} style={[styles.characterImage, { tintColor: 'gray' }]} />
-        <Image source={member.currentImages.head} style={[styles.characterImage, member.currentHealth === 0 && { opacity: 0.2 }]} />
+        <Image source={{uri: `${BASE_URL}${member.currentImages.head}`}} style={[styles.characterImage, { tintColor: 'gray' }]} />
+        <Image source={{uri: `${BASE_URL}${member.currentImages.head}`}} style={[styles.characterImage, member.currentHealth === 0 && { opacity: 0.2 }]} />
         {member.level !== undefined && (
           <View style={styles.levelContainer}>
             <Text style={styles.level}>{member.level}</Text>

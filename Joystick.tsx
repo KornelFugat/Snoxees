@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
+
 interface JoystickProps {
   onMove: (dx: number, dy: number) => void;
 }
@@ -12,7 +13,7 @@ const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0.5);
   const radius = 40; // Maximum radius of movement
-  const moveInterval = useRef<NodeJS.Timeout | null>(null);
+  const moveInterval = useRef<number | null>(null);
 
   const updateMovement = useCallback((x: number, y: number) => {
     const distance = Math.sqrt(x ** 2 + y ** 2);
@@ -21,13 +22,19 @@ const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
   }, [onMove]);
 
   const startContinuousMove = (x: number, y: number) => {
-    if (moveInterval.current) clearInterval(moveInterval.current);
-    moveInterval.current = setInterval(() => updateMovement(x, y), 100); // Update position every 100ms
+    if (moveInterval.current !== null) {
+      cancelAnimationFrame(moveInterval.current);
+    }
+    const move = () => {
+      updateMovement(x, y);
+      moveInterval.current = requestAnimationFrame(move);
+    };
+    moveInterval.current = requestAnimationFrame(move);
   };
 
   const stopContinuousMove = () => {
-    if (moveInterval.current) {
-      clearInterval(moveInterval.current);
+    if (moveInterval.current !== null) {
+      cancelAnimationFrame(moveInterval.current);
       moveInterval.current = null;
     }
     onMove(0, 0); // Stop movement
@@ -37,7 +44,7 @@ const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
     .onStart(() => {
       translateX.value = 0;
       translateY.value = 0;
-      opacity.value = withTiming(1, { duration: 200 });
+      opacity.value = withTiming(1, { duration: 100 });
     })
     .onUpdate((event) => {
       const x = event.translationX;
@@ -59,10 +66,10 @@ const Joystick: React.FC<JoystickProps> = ({ onMove }) => {
       runOnJS(startContinuousMove)(distance * Math.cos(angle), distance * Math.sin(angle));
     })
     .onEnd(() => {
-      translateX.value = withSpring(0);
-      translateY.value = withSpring(0);
+      translateX.value = withSpring(0, { damping: 20 }); // Reduced damping for faster snap-back
+      translateY.value = withSpring(0, { damping: 20 }); // Reduced damping for faster snap-back
       runOnJS(stopContinuousMove)();
-      opacity.value = withTiming(0.5, { duration: 200 });
+      opacity.value = withTiming(0.5, { duration: 100 }); // Reduced from 200ms to 100ms
     });
 
   const animatedContainerStyle = useAnimatedStyle(() => {
@@ -98,7 +105,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'lightgrey',
     justifyContent: 'center',
     alignItems: 'center',
-    top: 300,
+    top: 220,
   },
   joystick: {
     width: 50,

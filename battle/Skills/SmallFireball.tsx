@@ -2,19 +2,22 @@
 import React, { useEffect } from "react";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated';
 import { Image, StyleSheet } from 'react-native';
+import { CurrentTurn } from "types";
 
 interface SmallFireballProps {
-  playerTurn: boolean;
-  triggerEnemyEffect: () => void;
-  triggerPlayerEffect: () => void;
+  triggerEnemyEffect: (repeats: number, damage: (number | 'miss' | '')[]) => void;
+  triggerPlayerEffect: (repeats: number, damage: (number | 'miss' | '')[]) => void;
   isFireballActive: boolean;
   setIsFireballActive: (active: boolean) => void;
+  damageResults: (number | 'miss' | '')[];
+  currentTurn: 'start' | 'player' | 'enemy' | 'end';
 }
 
-const SmallFireball: React.FC<SmallFireballProps> = ({ playerTurn, triggerEnemyEffect, triggerPlayerEffect, isFireballActive, setIsFireballActive }) => {
+const SmallFireball: React.FC<SmallFireballProps> = ({ triggerEnemyEffect, triggerPlayerEffect, isFireballActive, setIsFireballActive, damageResults, currentTurn }) => {
   const fireballX = useSharedValue(0);
   const fireballY = useSharedValue(0);
   const fireballOpacity = useSharedValue(0);
+
 
   const fireballAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -24,27 +27,27 @@ const SmallFireball: React.FC<SmallFireballProps> = ({ playerTurn, triggerEnemyE
     opacity: fireballOpacity.value,
     zIndex: 1
   }));
-
-  const triggerFireball = (playerTurn = true) => {
+//S
+  const triggerFireball = (currentTurn: CurrentTurn) => {
     fireballOpacity.value = 1; // Make fireball visible
-    fireballX.value = playerTurn ? 100 : 350; // Reset to starting position
+    fireballX.value = currentTurn === 'player' ? 100 : 350; // Reset to starting position
     fireballY.value = 500;
 
     // Animate the fireball towards the enemy
-    fireballX.value = withTiming(playerTurn ? 350 : 100, { duration: 1000, easing: Easing.out(Easing.ease) });
+    fireballX.value = withTiming(currentTurn === 'player' ? 350 : 100, { duration: 1000, easing: Easing.out(Easing.ease) });
     fireballY.value = withTiming(499, { duration: 1000, easing: Easing.out(Easing.ease) }, () => {
-      if (playerTurn) {
-        runOnJS(triggerEnemyEffect)(); // Trigger the player effect after animation
-      } else {
-        runOnJS(triggerPlayerEffect)(); // Trigger the enemy effect after animation
-      }
+          if (currentTurn === 'player') {
+            runOnJS(triggerEnemyEffect)(damageResults.length, damageResults);
+          } else {
+            runOnJS(triggerPlayerEffect)(damageResults.length, damageResults);
+          }
       fireballOpacity.value = 0; // Hide the fireball after hitting the target
     });
   };
-
+//S
   useEffect(() => {
     if (isFireballActive) {
-      triggerFireball(playerTurn);
+      triggerFireball(currentTurn);
       setIsFireballActive(false);
     }
   }, [isFireballActive]);

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import attacksData from '../attacks.json';
-import SkillCard from '../SkillCard';
+import SkillCard from './SkillCard';
 import { Image } from 'expo-image';
-import { Skill, Attack } from '../types'; // Ensure the types are correctly imported
+import { Attack, Skill } from '../types'; // Ensure the types are correctly imported
 
 interface SkillsUIProps {
-  onAttackPress: (name: string, damage: number, type: string, multiplier: number) => void;
+  onAttackPress: (name: string) => void;
   skills: Skill[];
   disabled: boolean;
 }
@@ -16,13 +16,6 @@ const SkillsUI: React.FC<SkillsUIProps> = ({ onAttackPress, skills, disabled }) 
   const [showDetails, setShowDetails] = useState(false);
 
   const itemsPerPage = 4;
-
-  const iconMap: { [key: string]: any } = {
-    normal: require('../assets/normalskill.png'),
-    fire: require('../assets/fireskill.png'),
-    grass: require('../assets/grassskill.png'),
-  };
-
   const totalPages = Math.ceil(skills.length / itemsPerPage);
 
   const handleNextPage = () => {
@@ -51,8 +44,7 @@ const SkillsUI: React.FC<SkillsUIProps> = ({ onAttackPress, skills, disabled }) 
           key={index}
           skill={skill}
           attack={attack as Attack}
-          iconMap={iconMap}
-          onPress={() => !disabled ? onAttackPress(skill.name, attack!.damage, attack!.type, attack!.multiplier) : null}
+          onPress={() => !disabled ? onAttackPress(skill.name) : null}
           disabled={disabled}
           showDetails={showDetails}
         />
