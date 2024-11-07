@@ -125,7 +125,7 @@ const DraggableMap: React.FC<DraggableMapProps> = ({ onStartGame, team }) => {
           onLoad={() => setIsImageLoaded(true)}
         />
         <Animated.View style={[styles.player, playerStyle]}>
-          <Image source={require('./assets/enemy.png')} style={{ width: 100, height: 100 }} />
+          <Image source={require('./assets/attacker.png')} style={{ width: 100, height: 100 }} />
         </Animated.View>
         {images.map((img, index) => (
           <TouchableOpacity key={index} onPress={handleStartGame} style={[styles.startGameButton, { left: img.x, top: img.y }]}>

@@ -4,6 +4,7 @@ import SkillsUI from './SkillsUI';
 import TeamUI from './TeamUI';
 import ItemsUI from './ItemsUI';
 import { Character, Skill } from 'types';
+import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 
 const { width } = Dimensions.get('window');
 
@@ -37,30 +38,53 @@ const BattleUI: React.FC<BattleUIProps> = ({
   
 
   const getAnnouncementFontSize = (text: string) => {
-    return text.length > 23 ? responsiveFontSize(8) : responsiveFontSize(9);
+    return text.length > 30 ? responsiveFontSize(10) : responsiveFontSize(12);
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.tabs}>
-        {['skills', 'items', 'team'].map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[styles.tabOuter, activeTab === tab && styles.activeTabOuter]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <View style={styles.tabInner}>
-              <Text style={styles.tabText}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-        <View style={styles.announcementOuter}>
-          <View style={styles.announcementInner}>
-            <Text style={[styles.announcementText, { fontSize: getAnnouncementFontSize(announcement) }]}>
-              {announcement}
-            </Text>
-          </View>
+      <View style={styles.topContainer}>
+        <View style={styles.tabs}>
+          {['skills', 'items', 'team'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tabOuter, activeTab === tab && styles.activeTabOuter]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <View style={styles.tabInner}>
+              <StrokeText
+                text={tab.charAt(0).toUpperCase() + tab.slice(1)}
+                fontSize={responsiveFontSize(12)}
+                color='#ffffff'
+                strokeColor="#000000" // Adjust stroke color as needed
+                strokeWidth={3}
+                fontFamily="Nunito-Black" // Adjust font family as needed
+                align="center"
+                numberOfLines={1}
+                width={width * 0.09} // Adjust width as needed
+              />
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
+        <View style={styles.announcementContainer}>
+          <View style={styles.announcementOuter}>
+            <View style={styles.announcementInner}>
+            <StrokeText
+                text={announcement}
+                fontSize={responsiveFontSize(12)}
+                color='#ffffff'
+                strokeColor="#000000" // Adjust stroke color as needed
+                strokeWidth={3}
+                fontFamily="Nunito-Black" // Adjust font family as needed
+                align="center"
+                numberOfLines={1}
+                width={width*0.5} // Adjust width as needed
+              />
+            </View>
+          </View>
+      </View>
+
       </View>
       <View style={styles.uiContainer}>
         {activeTab === 'skills' && (
@@ -94,33 +118,42 @@ const styles = StyleSheet.create({
     backgroundColor: '#A9B2BC',
     padding: 15,
   },
+  topContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    backgroundColor: 'transparent',
+    paddingVertical: 0,
+    left: '2%',
+    width: '100%',
+    height: '12%',
+  },
   tabs: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    backgroundColor: 'transparent',
-    paddingVertical: 0,
-    left: 5,
+    width: '45%',
   },
   tabOuter: {
-    minWidth: '15%',
+    width: '31%',
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 6,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    marginRight: 5,
+    marginRight: 3,
     backgroundColor: '#A9B2BC',
-    padding: 2,
+    padding: 3,
   },
   activeTabOuter: {
     borderBottomWidth: 0,
   },
   tabInner: {
     backgroundColor: '#333',
-    borderWidth: 3,
+    borderWidth: 1,
     borderColor: '#A9B2BC',
     borderRadius: 4,
     padding: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabText: {
     fontSize: responsiveFontSize(14),
@@ -131,12 +164,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Nunito-Black',
   },
+  announcementContainer: {
+    width: '54%',
+  },
   announcementOuter: {
-    flex: 1,
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 6,
-    marginLeft: 20,
     marginRight: 5,
     backgroundColor: '#ccc',
     padding: 2,
@@ -146,10 +180,12 @@ const styles = StyleSheet.create({
   },
   announcementInner: {
     backgroundColor: '#333',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#A9B2BC',
     borderRadius: 4,
     padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   announcementText: {
     color: 'white',
@@ -158,7 +194,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
     textAlign: 'center',
     fontFamily: 'Nunito-Black',
-    maxHeight: 50,
+    fontSize: responsiveFontSize(5),
   },
   catchButton: {
     padding: 10,
@@ -169,12 +205,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-  },
-  announcementContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingHorizontal: 10,
   },
 });
 

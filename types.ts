@@ -1,6 +1,13 @@
 
 export type ScreenType = 'home' | 'team' | 'characters' | 'battle' | 'afterBattle' | 'screen' | 'town' | 'snoexes';
 
+export interface BattlegroundHandle {
+  triggerPlayerGettingHit: ( damageResults?: DamageResult[], attackClasses?: string[]) => void;
+  triggerEnemyGettingHit: ( damageResults?: DamageResult[], attackClasses?: string[]) => void;
+  triggerPlayerAttacking: (attackClasses?: string[]) => void;
+  triggerEnemyAttacking: (attackClasses?: string[]) => void;
+}
+
 export interface BaseStats {
     maxHealth: number;
     speed: number;
@@ -28,6 +35,32 @@ export interface BaseStats {
     };
   }
 
+  export interface PlayerMark {
+    isOn: boolean;
+    value?: number;
+    turns?: number;
+    damage?: number;
+  }
+  
+  export interface PlayerMarks {
+    asleep: PlayerMark;
+    freeze: PlayerMark;
+    poison: PlayerMark;
+    paralysis: PlayerMark;
+    defEleBuff: PlayerMark;
+    defEleDebuff: PlayerMark;
+    defNorBuff: PlayerMark;
+    defNorDebuff: PlayerMark;
+    dmgEleBuff: PlayerMark;
+    dmgEleDebuff: PlayerMark;
+    dmgNorBuff: PlayerMark;
+    dmgNorDebuff: PlayerMark;
+  }
+  
+  export type EnemyMarks = PlayerMarks;
+
+  export type DamageResult = number | 'miss' | { effectName: string; value?: number };
+
   export interface BattleStore {
     isInitialized: boolean;
     enemy: Enemy | null;
@@ -36,7 +69,7 @@ export interface BaseStats {
     isUIEnabled: boolean;
     currentPlayerIndex: number;
     chosenAttack: string | null;
-    damageResults: (number | 'miss')[];
+    damageResults: DamageResult[];
     changedPlayerStats: { stat: string, newValue: number }[];
     changedEnemyStats: { stat: string, newValue: number }[];
     isSwitching: boolean;
@@ -46,12 +79,8 @@ export interface BaseStats {
     turnCounter: number;
     result: BattleResult | null;
     experienceGained: number;
-    isPlayerAsleep: boolean;
-    isEnemyAsleep: boolean;
-    playerDamageOverTime: number;
-    enemyDamageOverTime: number;
-    playerDamageOverTimeDuration: number;
-    enemyDamageOverTimeDuration: number;
+    playerMarks: PlayerMarks;
+    enemyMarks: EnemyMarks;
     setIsInitialized: (isInitialized: boolean) => void;
     setEnemy: (enemy: Enemy | null) => void;
     setCurrentAnnouncement: (announcement: Announcement[] | null) => void;
@@ -64,12 +93,8 @@ export interface BaseStats {
     setCaptureChance: (chance: number) => void;
     setCaptureChanceModifier: (modifier: number) => void;
     setTurnCounter: (counter: number) => void;
-    setIsPlayerAsleep: (isAsleep: boolean) => void;
-    setIsEnemyAsleep: (isAsleep: boolean) => void;
-    setPlayerDamageOverTime: (damageOverTime: number) => void;
-    setEnemyDamageOverTime: (damageOverTime: number) => void;
-    setPlayerDamageOverTimeDuration: (duration: number) => void;
-    setEnemyDamageOverTimeDuration: (duration: number) => void;
+    setPlayerMarks: (marks: Partial<PlayerMarks>) => void;
+    setEnemyMarks: (marks: Partial<EnemyMarks>) => void;
   }
   
   export interface Skill {

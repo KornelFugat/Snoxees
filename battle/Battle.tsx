@@ -6,9 +6,10 @@ import BattleUI from './BattleUI';
 import { Image } from 'expo-image';
 import { StrokeText } from '@charmy.tech/react-native-stroke-text';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Character, Announcement, Enemy, BattleAnimationResult } from '../types';
+import { Character, Announcement, Enemy, BattleAnimationResult, PlayerMarks, EnemyMarks, BattlegroundHandle, Attack, DamageResult } from '../types';
 import { enemyAttack, fetchBattleDetails, initialize, playerAttack, playerCatch, playerSwitch } from 'api/battleApi';
 import { BASE_URL, fetchAccountDetails } from 'api/accountApi';
+import attacksData from '../attacks.json';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,7 +21,7 @@ interface BattleProps {
 }
 
 const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
-
+    const battlegroundRef = useRef<BattlegroundHandle>(null);
     const triggerStartAnimation = useRef(false);
     const triggerSwitchAnimations = useRef(false);
     const [triggerEndAnimation, setTriggerEndAnimation] = useState<{ type: BattleAnimationResult | null, id: number }>({ type: null, id: 0 });
@@ -33,46 +34,90 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [chosenAttack, setChosenAttack] = useState<string | null>('');
     const [attackId, setAttackId] = useState(0);
-    const [damageResults, setDamageResults] = useState<(number | 'miss')[]>([]);
+    const [damageResults, setDamageResults] = useState<DamageResult[]>([]);
     const [isSwitching, setIsSwitching] = useState(false);
     const [captureChance, setCaptureChance] = useState(0);
-    const [isPlayerAsleep, setIsPlayerAsleep] = useState(false);
-    const [isEnemyAsleep, setIsEnemyAsleep] = useState(false);
-    const [enemyDamageOverTime, setEnemyDamageOverTime] = useState(0);
-    const [playerDamageOverTime, setPlayerDamageOverTime] = useState(0);
-    const [enemyDamageOverTimeDuration, setEnemyDamageOverTimeDuration] = useState(0);
-    const [playerDamageOverTimeDuration, setPlayerDamageOverTimeDuration] = useState(0);
+    const [playerMarks, setPlayerMarks] = useState<PlayerMarks>({
+      asleep: { isOn: false },
+      freeze: { isOn: false },
+      poison: { isOn: false, turns: 0, damage: 0 },
+      paralysis: { isOn: false, turns: 0, damage: 0 },
+      defEleBuff: { isOn: false, value: 0 },
+      defEleDebuff: { isOn: false, value: 0 },
+      defNorBuff: { isOn: false, value: 0 },
+      defNorDebuff: { isOn: false, value: 0 },
+      dmgEleBuff: { isOn: false, value: 0 },
+      dmgEleDebuff: { isOn: false, value: 0 },
+      dmgNorBuff: { isOn: false, value: 0 },
+      dmgNorDebuff: { isOn: false, value: 0 },
+    });
+    
+    const [enemyMarks, setEnemyMarks] = useState<EnemyMarks>({
+      asleep: { isOn: false },
+      freeze: { isOn: false },
+      poison: { isOn: false, turns: 0, damage: 0 },
+      paralysis: { isOn: false, turns: 0, damage: 0 },
+      defEleBuff: { isOn: false, value: 0 },
+      defEleDebuff: { isOn: false, value: 0 },
+      defNorBuff: { isOn: false, value: 0 },
+      defNorDebuff: { isOn: false, value: 0 },
+      dmgEleBuff: { isOn: false, value: 0 },
+      dmgEleDebuff: { isOn: false, value: 0 },
+      dmgNorBuff: { isOn: false, value: 0 },
+      dmgNorDebuff: { isOn: false, value: 0 },
+    });
     const [turnAnnouncement, setTurnAnnouncement] = useState<string>('');
     const [turnText, setTurnText] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
+    const resettedMarks = {
+      asleep: { isOn: false },
+      freeze: { isOn: false },
+      poison: { isOn: false, turns: 0, damage: 0 },
+      paralysis: { isOn: false, turns: 0, damage: 0 },
+      defEleBuff: { isOn: false, value: 0 },
+      defEleDebuff: { isOn: false, value: 0 },
+      defNorBuff: { isOn: false, value: 0 },
+      defNorDebuff: { isOn: false, value: 0 },
+      dmgEleBuff: { isOn: false, value: 0 },
+      dmgEleDebuff: { isOn: false, value: 0 },
+      dmgNorBuff: { isOn: false, value: 0 },
+      dmgNorDebuff: { isOn: false, value: 0 },
+    }
 
-    const applyDamageStepByStep = async (damageResults: (number | 'miss')[], target: 'player' | 'enemy') => {
+    const applyDamageStepByStep = async (damageResults: DamageResult[], target: 'player' | 'enemy') => {
       for (let i = 0; i < damageResults.length; i++) {
-          const damage = damageResults[i];
-          if (damage !== 'miss') {
-              setTeam(prevTeam => {
-                  const newTeam = [...prevTeam];
-                  if (target === 'player') {
-                    newTeam[currentPlayerIndex].currentHealth = Math.max(newTeam[currentPlayerIndex].currentHealth - damage, 0);
-                  }
-                  return newTeam;
-              });
-              setEnemy(prevEnemy => {
-                  if (target === 'enemy' && prevEnemy) {
-                      const newEnemy = { ...prevEnemy };
-                      newEnemy.currentHealth = Math.max(newEnemy.currentHealth - damage, 0);
-                      return newEnemy;
-                  }
-                  return prevEnemy;
-              });
+        const damage = damageResults[i];
+        if (damage !== 'miss' && typeof damage === 'number') {
+          if (target === 'player') {
+            setTeam(prevTeam => {
+              const newTeam = [...prevTeam];
+              const currentPlayer = newTeam[currentPlayerIndex];
+              const maxHealth = currentPlayer.baseStats.maxHealth;
+              currentPlayer.currentHealth = Math.min(
+                Math.max(currentPlayer.currentHealth - damage, 0),
+                maxHealth
+              );
+              return newTeam;
+            });
+          } else if (target === 'enemy') {
+            setEnemy(prevEnemy => {
+              if (prevEnemy) {
+                const newEnemy = { ...prevEnemy };
+                const maxHealth = newEnemy.baseStats.maxHealth;
+                newEnemy.currentHealth = Math.min(
+                  Math.max(newEnemy.currentHealth - damage, 0),
+                  maxHealth
+                );
+                return newEnemy;
+              }
+              return prevEnemy;
+            });
           }
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay between each damage application
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      const result = await fetchBattleDetails(); // Fetch final health confirmation
-      const resultTeam = await fetchAccountDetails();
-      setTeam(resultTeam.team);
-      setEnemy(result.enemy);
-  };
+    };
+
 
     //announcements
     useEffect(() => {
@@ -98,10 +143,10 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
       }
   }, [isSwitching]);
 
-  useEffect(() => {
-    console.log('currentTurn', currentTurn)
-  }, [currentTurn])
 
+  useEffect(() => {
+      console.log('current turn', currentTurn, Date.now())
+  }, [currentTurn])
     //initializing battle
 
     useEffect(() => {
@@ -114,6 +159,9 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
                 setChosenAttack(result.chosenAttack);
                 setDamageResults(result.damageResults);
                 setCaptureChance(result.captureChance);
+                setTimeout(() => {
+                  setCurrentTurn(result.currentTurn);
+                }, 3000)
                 const teamResult = await fetchAccountDetails()
                 setTeam(teamResult.team)
                 setIsLoading(false);   
@@ -124,56 +172,129 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
     
         initializeBattle();
         triggerStartAnimation.current = true;
-        
-          const fetch = async () => {
-            const result = await fetchBattleDetails();
-            setCurrentTurn(result.currentTurn);
-          }
-
-          setTimeout(() => {
-            fetch();
-          }, 3000)
-          
     }, []);
 
     //Player turn
 
     useEffect(() => {
         if (currentTurn === 'player') {
+          console.log('player turn testing', Date.now())
           //Announcement Player Turn
           setAnnouncementQueue([{text: `${team[currentPlayerIndex]?.name ?? 'Player'} turn!`, displayTime: 1000} ]);
           //Check if player is asleep
           const fetch0 = async () => {
             const result = await fetchBattleDetails();
-            setIsEnemyAsleep(result.isEnemyAsleep);
-            setPlayerDamageOverTimeDuration(result.playerDamageOverTimeDuration);
-            if(result.playerDamageOverTimeDuration > 0) {
-              setTeam(prevTeam => {
-                const newTeam = [...prevTeam];
-                newTeam[currentPlayerIndex].currentHealth = Math.max(newTeam[currentPlayerIndex].currentHealth - result.playerDamageOverTime, 0);
-                return newTeam;
-              });
-              if (team[currentPlayerIndex].currentHealth - playerDamageOverTime < 0) {
-                if(result.currentPlayerIndex !== currentPlayerIndex) {
-                  setAnnouncementQueue([{text: `${team[currentPlayerIndex].name ?? 'Player2'} has been defeated!`, displayTime: 1000}, {text: `${team[result.currentPlayerIndex].name ?? 'Player1'} takes ${team[currentPlayerIndex].name ?? 'Player2'} place!`, displayTime: 1000} ]);
-                  setIsSwitching(result.isSwitching);
-                  setCurrentPlayerIndex(result.currentPlayerIndex);
-                  setIsUIEnabled(true);
-                } else {
-                  setTimeout(() => {
-                    setCurrentTurn(result.currentTurn)
-                  }, 3000)
-                }
+            setEnemyMarks(result.enemyMarks);
+            setPlayerMarks(result.playerMarks);
+            let playerDefeated = false;
+            console.log('player marks', result.playerMarks)
+            if(result.playerMarks.poison.isOn && result.playerMarks.poison.damage) {
+                console.log('player is poisoned', Date.now())
+                let damage = [result.playerMarks.poison.damage];
+                battlegroundRef.current?.triggerPlayerGettingHit(
+                  damage,
+                  ['poison']
+                );
+                applyDamageStepByStep(damage, 'player');
               }
-            }
-            if (!result.isPlayerAsleep) {
-              setIsUIEnabled(true);
-            } else {
-              setAnnouncementQueue([{text: `${team[currentPlayerIndex]?.name ?? 'Player'} sleeps!`, displayTime: 3000} ]);
-              setTimeout(() => {
-                setCurrentTurn(result.currentTurn)
-              }, 3000)
-            }
+
+
+            if(result.playerMarks.paralysis.isOn && result.playerMarks.paralysis.damage) {
+                console.log('player is paralised', Date.now())
+                let damage = [result.playerMarks.paralysis.damage];
+                battlegroundRef.current?.triggerPlayerGettingHit(
+                  damage,
+                  ['paralyse']
+                );
+                applyDamageStepByStep(damage, 'player');
+              }
+
+              setTimeout(async () => {
+                const updatedTeam = [...team];
+                const playerHealth = updatedTeam[currentPlayerIndex].currentHealth;
+
+                if (playerHealth <= 0) {
+
+                  if(result.currentPlayerIndex !== currentPlayerIndex) {
+                    console.log('player defeated 1', Date.now())
+                    playerDefeated = true;
+                      setAnnouncementQueue([{text: `${team[currentPlayerIndex].name ?? 'Player2'} has been defeated!`, displayTime: 2500}, {text: `${team[result.currentPlayerIndex].name ?? 'Player1'} takes ${team[currentPlayerIndex].name ?? 'Player2'} place!`, displayTime: 2500} ]);
+                      setIsSwitching(result.isSwitching);
+                    setTimeout(() => {
+                      setCurrentPlayerIndex(result.currentPlayerIndex);
+                      setPlayerMarks(resettedMarks);
+                    }, 3000)
+                    setTimeout(() => {
+                      setIsUIEnabled(true);
+                    }, 3500)
+                  } else {
+                    console.log('player defeated', Date.now())
+                    playerDefeated = true;
+                    setAnnouncementQueue([
+                      {
+                        text: `${team[currentPlayerIndex].name ?? 'Player'} has been defeated!`,
+                        displayTime: 3000,
+                      },
+                    ]);
+                    setTriggerEndAnimation({
+                      type: 'lastPlayerDefeated',
+                      id: triggerEndAnimation.id + 1,
+                    });
+
+                    const waitForServerUpdate = async () => {
+                      const serverUpdateDelay = 1500; // Adjust to match server delay
+                      await new Promise((resolve) => setTimeout(resolve, serverUpdateDelay));
+      
+                      const result2 = await fetchBattleDetails();
+                      if (result2.currentTurn === 'end') {
+                        setCurrentTurn(result2.currentTurn);
+                      } else {
+                        console.log('Server has not updated currentTurn yet, retrying...');
+                        // Optionally implement a retry mechanism here
+                      }
+                    };
+      
+                    waitForServerUpdate();
+                  }
+                }
+                
+                if (!playerDefeated) {
+                  console.log('player turn testing while shouldnt', Date.now())
+                  if (playerMarks.asleep.isOn) {
+                      setAnnouncementQueue([{text: `${team[currentPlayerIndex]?.name ?? 'Player'} sleeps!`, displayTime: 3000} ]);
+                    setTimeout(() => {
+                      const fetch2 = async () => {
+                        try {
+                            const result2 = await fetchBattleDetails();
+                            setCurrentTurn(result2.currentTurn);
+                        } catch (error) {
+                            console.error('Failed to fetch battle details:', error);
+                        }
+                      }
+                      fetch2();
+                    }, 2100)
+                  } else if (playerMarks.freeze.isOn) {
+                      setAnnouncementQueue([{text: `${team[currentPlayerIndex]?.name ?? 'Player'} is frozen!`, displayTime: 3000} ]);
+                    setTimeout(() => {
+                      const fetch2 = async () => {
+                        try {
+                            const result2 = await fetchBattleDetails();
+                            setCurrentTurn(result2.currentTurn);
+                        } catch (error) {
+                            console.error('Failed to fetch battle details:', error);
+                        }
+                      }
+                      fetch2();
+                    }, 2100)
+                  } else {
+                      setIsUIEnabled(true)
+                  }
+                }
+              }, 1500)
+
+
+
+
           }
           fetch0();
           }
@@ -192,37 +313,64 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
   //Player attack
 
     const handlePlayerAttack = async (attackName: string) => {
+      console.log('player attacks', Date.now())
         try {
             const result = await playerAttack(attackName);
-            console.log('player attack result', result)
             setIsUIEnabled(false);
             setChosenAttack(result.chosenAttack);
+
+            const attackData = attacksData.find(a => a.name === result.chosenAttack);
+            const attackClasses = attackData ? attackData.class : [];
+            const isHealingAttack = attackClasses.includes('heal') || attackClasses.includes('buff');
             setCaptureChance(result.captureChance);
-            setIsEnemyAsleep(result.isEnemyAsleep);
-            setEnemyDamageOverTimeDuration(result.enemyDamageOverTimeDuration);
+            battlegroundRef.current?.triggerPlayerAttacking(attackClasses);
             if(result.chosenAttack) {
               setAnnouncementQueue([{text: `${team[currentPlayerIndex]?.name ?? 'Player'} uses ${result.chosenAttack}!`, displayTime: 1000} ]);
             }
             setDamageResults(result.damageResults);
             setAttackId(attackId + 1);
             setTimeout(async () => {
-              await applyDamageStepByStep(result.damageResults, 'enemy');      
-            }, 1500)
+              setPlayerMarks(result.playerMarks);
+              setEnemyMarks(result.enemyMarks);
+              if (isHealingAttack) {
+                // Display healing over the player
+                battlegroundRef.current?.triggerPlayerGettingHit(
+                  result.damageResults,
+                  attackClasses
+                );
+                await applyDamageStepByStep(result.damageResults, 'player');
+              } else {
+                // Display damage over the enemy
+                battlegroundRef.current?.triggerEnemyGettingHit(
+                  result.damageResults,
+                  attackClasses
+                );
+                await applyDamageStepByStep(result.damageResults, 'enemy');
+              }    
+            }, 2000)
 
             setTimeout(() => {
               setChosenAttack(null)
             }, 1000)
             if (result.currentTurn === 'end' && enemy) {
               setTimeout(() => {
-                setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} has been defeated`, displayTime: 2000} ]);
+                setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} has been defeated!`, displayTime: 2000} ]);
                 setTriggerEndAnimation({ type: 'enemyDefeated', id: triggerEndAnimation.id + 1 });
-              }, 3000)
+              }, 3500 + 1000 * result.damageResults.length)
             }
             setTimeout(() => {
-              setChosenAttack(null);
-              setCurrentTurn(result.currentTurn);
+              const fetch2 = async () => {
+                try {
+                    const result2 = await fetchBattleDetails();
+                    setCurrentTurn(result2.currentTurn);
+                } catch (error) {
+                    console.error('Failed to fetch battle details:', error);
+                }
+              }
+              fetch2();
               console.log('zmiana tury', Date.now())
-            }, 3500)
+              setChosenAttack(null);
+            }, 3500 + 1000 * result.damageResults.length)
             
         } catch (error) {
             console.error('Failed to execute player attack:', error);
@@ -240,7 +388,9 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
         setIsUIEnabled(false);
         setTimeout(() => {
           setCurrentPlayerIndex(result.currentPlayerIndex);
-        }, 2500)
+          setPlayerMarks(resettedMarks);
+          setDamageResults(result.damageResults);
+        }, 3000)
       } catch (error) {
           console.error('Failed to fetch battle details:', error);
       }
@@ -250,14 +400,16 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
     const fetch2 = async () => {
       try {
           const result = await fetchBattleDetails();
+          console.log('swap', result)
           setCurrentTurn(result.currentTurn);
       } catch (error) {
           console.error('Failed to fetch battle details:', error);
       }
   }
     setTimeout(() => {
+      console.log('turn enemy after swap', Date.now())
       fetch2();
-    }, 8000)
+    }, 4000)
     };
 
   //Player catch
@@ -291,14 +443,16 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
     const fetch2 = async () => {
       try {
           const result = await fetchBattleDetails();
-          setCurrentTurn(result.currentTurn);
+          setTimeout(() => {
+            setCurrentTurn(result.currentTurn);
+          }, 4000)
       } catch (error) {
           console.error('Failed to fetch battle details:', error);
       }
   }
     setTimeout(() => {
       fetch2();
-    }, 8000)
+    }, 3500)
   }
 
 
@@ -308,65 +462,182 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
 
   useEffect(() => {
     if (currentTurn === 'enemy' && enemy) {  
+      console.log('enemy turn', Date.now())
+      setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} turn!`, displayTime: 1500}]);
           const fetch = async () => {
             try {
                 const result = await fetchBattleDetails();
-                console.log('resultenemy', result)
-                setEnemyDamageOverTimeDuration(result.enemyDamageOverTimeDuration);
-                if(result.enemyDamageOverTimeDuration > 0) {
-                  setEnemy(prevEnemy => {
-                        const newEnemy = { ...prevEnemy };
-                        if (newEnemy.currentHealth !== undefined) {
-                          newEnemy.currentHealth = Math.max(newEnemy.currentHealth - enemyDamageOverTime, 0);
-                      }
-                        return newEnemy as Enemy | null;
-                  });
+                setDamageResults(result.damageResults);
+              
+                let enemyDefeated = false;
+                
+                if(result.enemyMarks.poison.isOn && result.enemyMarks.poison.damage) {
+                    if (result.enemyMarks.poison.damage) {
+                      let damage = [result.enemyMarks.poison.damage];
+                      battlegroundRef.current?.triggerEnemyGettingHit(
+                        damage,
+                        ['poison']
+                      );
+                      applyDamageStepByStep(damage, 'enemy');
+                      console.log('enemy poisoned', Date.now())
+                    }      
+                  if (result.currentTurn === 'end' || enemy.currentHealth - result.enemyMarks.poison.damage < 0) {
+                    enemyDefeated = true;
+                    setTimeout(() => {
+                      setTriggerEndAnimation({ type: 'enemyDefeated', id: triggerEndAnimation.id + 1 });
+                      setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} has been defeated!`, displayTime: 1000} ]);
+                      console.log('ending1')
+                        const fetch2 = async () => {
+                          try {
+                              const result2 = await fetchBattleDetails();
+                              setCurrentTurn(result2.currentTurn);
+                          } catch (error) {
+                              console.error('Failed to fetch battle details:', error);
+                          }
+                        }
+                        fetch2();
+                    }, 3000)
+                  }
+                }
+
+                if(result.enemyMarks.paralysis.isOn && result.enemyMarks.paralysis.damage) {
+                  let damage = [result.enemyMarks.paralysis.damage];
+                  applyDamageStepByStep(damage, 'enemy');
                   if (result.currentTurn === 'end') {
                     setTriggerEndAnimation({ type: 'enemyDefeated', id: triggerEndAnimation.id + 1 });
-                    setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} turn!`, displayTime: 1000},{text: `${enemy.name ?? 'Enemy'} has been defeated`, displayTime: 1000} ]);
+                    setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} turn!`, displayTime: 1000},{text: `${enemy.name ?? 'Enemy'} has been defeated!`, displayTime: 1000} ]);
                     setTimeout(() => {
                       setCurrentTurn(result.currentTurn);
                     }, 2000)
                   }
                 }
-                if (result.isEnemyAsleep) {
-                  setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} turn!`, displayTime: 1000},{text: `${enemy.name ?? 'Enemy'} sleeps!`, displayTime: 1000} ]);
-                } else {
-                  setChosenAttack(result.chosenAttack);
-                  if(result.chosenAttack) {
-                    setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} turn!`, displayTime: 1000},{text: `${enemy.name ?? 'Enemy'} uses ${result.chosenAttack}!`, displayTime: 1000} ]);
-                  }
-                  setDamageResults(result.damageResults);
-                  setAttackId(attackId + 1);
-                  setEnemy(result.enemy);
-                  setTimeout(async () => {
-                    await applyDamageStepByStep(result.damageResults, 'player');
-                  }, 1500)
-                  if (result.currentPlayerIndex !== currentPlayerIndex) {
-                    setTimeout(() => {
-                      setAnnouncementQueue([{text: `${team[currentPlayerIndex].name ?? 'Player2'} has been defeated!`, displayTime: 2000}, {text: `${team[result.currentPlayerIndex].name ?? 'Player1'} takes ${team[currentPlayerIndex].name ?? 'Player2'} place!`, displayTime: 1000} ]);
-                      setIsSwitching(result.isSwitching);
+                if(!enemyDefeated) {
+                  if (enemyMarks.asleep.isOn || enemyMarks.freeze.isOn) {
+                    if (enemyMarks.asleep.isOn) {
+                      console.log('enemy is asleep', Date.now())
                       setTimeout(() => {
-                        setCurrentPlayerIndex(result.currentPlayerIndex);
-                        setIsUIEnabled(true);
-                      }, 3000)
-                    }, 3000)
-                  }
-                  setTimeout(() => {
-                    console.log('we here')
-                    console.log(result)
-                    setChosenAttack(null);
-                    if (result.currentTurn === 'end') {
-                      setAnnouncementQueue([{text: `${team[currentPlayerIndex].name ?? 'Player2'} has been defeated!`, displayTime: 3000} ]);
-                      setTriggerEndAnimation({ type: 'lastPlayerDefeated', id: triggerEndAnimation.id + 1 });
-                        setCurrentTurn(result.currentTurn);
-                    } else {
+                        setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} sleeps!`, displayTime: 1000} ]);             
+                      }, 1500)
+                    } else if (enemyMarks.freeze.isOn) {
+                      console.log('enemy is frozen', Date.now())
                       setTimeout(() => {
-                        setCurrentTurn(result.currentTurn);
-                      },3000)
+                        setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} is frozen!`, displayTime: 1000} ]);             
+                      }, 1500)
                     }
+                    setTimeout(() => {
+                      setChosenAttack(null);
+                      const fetch2 = async () => {
+                        try {
+                            const result2 = await fetchBattleDetails();
+                            setCurrentTurn(result2.currentTurn);
+                            if (result2.currentTurn === 'end') {
+                              setAnnouncementQueue([{text: `${team[currentPlayerIndex].name ?? 'Player2'} has been defeated!`, displayTime: 3000} ]);
+                              setTriggerEndAnimation({ type: 'lastPlayerDefeated', id: triggerEndAnimation.id + 1 });
+                            } 
+                        } catch (error) {
+                            console.error('Failed to fetch battle details:', error);
+                        }
+                      }
+                      fetch2();
+                    }, 3200 + damageResults.length * 1000);
 
-                  }, 3000)
+                  } else {
+                    setChosenAttack(result.chosenAttack);
+                    const attackData = attacksData.find(a => a.name === result.chosenAttack);
+                    const attackClasses = attackData ? attackData.class : [];
+                    const isHealingAttack = attackClasses.includes('heal') || attackClasses.includes('buff');
+                    if(result.chosenAttack) {
+                      console.log('enemy attack', Date.now())
+                      setTimeout(() => {
+                        battlegroundRef.current?.triggerEnemyAttacking(attackClasses);
+                        setAnnouncementQueue([{text: `${enemy.name ?? 'Enemy'} uses ${result.chosenAttack}!`, displayTime: 1000} ]);                      
+                      }, 1000)
+                      setAttackId(attackId + 1);
+                    }
+                    setTimeout(async () => {
+                      setPlayerMarks(result.playerMarks);
+                      setEnemyMarks(result.enemyMarks);
+                      if (isHealingAttack) {
+                        // Display healing over the enemy
+                        battlegroundRef.current?.triggerEnemyGettingHit(
+                          result.damageResults,
+                          attackClasses
+                        );
+                         applyDamageStepByStep(result.damageResults, 'enemy');
+                      } else {
+                        // Display damage over the player
+                        battlegroundRef.current?.triggerPlayerGettingHit(
+                          result.damageResults,
+                          attackClasses
+                        );
+                         applyDamageStepByStep(result.damageResults, 'player');
+                      }
+                    }, 2000)
+
+                    const damageAnimationDuration = result.damageResults.length * 1000;
+                    await new Promise((resolve) => setTimeout(resolve, damageAnimationDuration + 3200));
+                    const updatedResult = await fetchBattleDetails();
+                    let playerDefeated = false;
+                    console.log('updatedResult')
+
+                    if (updatedResult.currentPlayerIndex !== currentPlayerIndex) {
+                      // Player is defeated and there's a substitute
+                      playerDefeated = true;
+                
+                      setIsSwitching(updatedResult.isSwitching);
+                      setAnnouncementQueue([
+                        {
+                          text: `${team[currentPlayerIndex].name ?? 'Player'} has been defeated!`,
+                          displayTime: 2000,
+                        },
+                        {
+                          text: `${team[updatedResult.currentPlayerIndex].name ?? 'Substitute'} enters the battle!`,
+                          displayTime: 2000,
+                        },
+                      ]);
+                
+                      await new Promise((resolve) => setTimeout(resolve, 3000));
+                
+                      setCurrentPlayerIndex(updatedResult.currentPlayerIndex);
+                      setPlayerMarks(resettedMarks);
+                
+                      setTimeout(() => {
+                        setIsUIEnabled(true);
+                      }, 500);
+                    } else if (updatedResult.currentTurn === 'end') {
+                      // Player is defeated with no substitutes (Game Over)
+                      playerDefeated = true;
+                
+                      setAnnouncementQueue([
+                        {
+                          text: `${team[currentPlayerIndex].name ?? 'Player'} has been defeated!`,
+                          displayTime: 3000,
+                        },
+                      ]);
+                      setTriggerEndAnimation({
+                        type: 'lastPlayerDefeated',
+                        id: triggerEndAnimation.id + 1,
+                      });
+                
+                      // Wait for the server to confirm the game over state
+                      const serverUpdateDelay = 1000; // Adjust to match server delay
+                      await new Promise((resolve) => setTimeout(resolve, serverUpdateDelay));
+                
+                      const finalResult = await fetchBattleDetails();
+                      if (finalResult.currentTurn === 'end') {
+                        setCurrentTurn(finalResult.currentTurn);
+                      } else {
+                        console.error('Server did not update currentTurn to end as expected');
+                        // Optionally implement a retry mechanism here
+                      }
+                    }
+                
+                    if (!playerDefeated) {
+                      // Fetch the next turn from the server
+                      const nextTurnResult = await fetchBattleDetails();
+                      setCurrentTurn(nextTurnResult.currentTurn);
+                    }
+                  }
                 }
               } catch (error) {
                 console.error('Failed to fetch battle details:', error);
@@ -378,33 +649,29 @@ const Battle: React.FC<BattleProps> = ({ onGoBack, onBattleEnd }) => {
     }
 }, [currentTurn]);
 
-useEffect(() => {
-  console.log('isSwitching', isSwitching)
-  console.log('currentTurn', currentTurn)
-}, [currentTurn, isSwitching])
 
 useEffect(() => {
+  let announcement = '';
+  let text = '';
+
   if (currentTurn === 'player') {
-    setTurnAnnouncement('Turn 1');
-    setTurnText('Your turn');
+      announcement = 'Turn 1';
+      text = 'Your turn';
   } else if (currentTurn === 'enemy') {
-    setTurnAnnouncement('Turn 2');
-    setTurnText('Enemy turn');
+      announcement = 'Turn 2';
+      text = 'Enemy turn';
   }
-}, [currentTurn]);
 
-useEffect(() => {
-  setTimeout(() => {
-    if (currentTurn === 'player') {
+  setTurnAnnouncement(announcement);
+  setTurnText(text);
+
+  const timer = setTimeout(() => {
       setTurnAnnouncement('');
       setTurnText('');
-    } else if (currentTurn === 'enemy') {
-      setTurnAnnouncement('');
-      setTurnText('');
-    }
-  }, 2000)
-}, [currentTurn]);
+  }, 2000);
 
+  return () => clearTimeout(timer);
+}, [currentTurn]);
 
   useEffect(() => {
     if (currentTurn === 'end') {
@@ -461,6 +728,7 @@ useEffect(() => {
     >
       {enemy &&
         <Battleground
+        ref={battlegroundRef}
         team={team}
         enemy={enemy}
         currentPlayerIndex={currentPlayerIndex}
@@ -473,8 +741,8 @@ useEffect(() => {
         triggerStartAnimation={triggerStartAnimation}
         triggerSwitchAnimations={triggerSwitchAnimations}
         triggerEndAnimation={triggerEndAnimation}
-        isEnemyAsleep={isEnemyAsleep}
-        isPlayerAsleep={isPlayerAsleep}
+        playerMarks={playerMarks}
+        enemyMarks={enemyMarks}
     />
       }
       
